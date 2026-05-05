@@ -1,6 +1,6 @@
 import { Accelerometer, Magnetometer } from "expo-sensors";
-import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState, useMemo } from "react";
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from "react-native";
 
 // Importa os dados que você salvou no arquivo JSON
 import dadosTroplux from "./dados.json";
@@ -9,11 +9,34 @@ import dadosTroplux from "./dados.json";
 type TropluxData = Record<string, Record<string, number>>;
 const dados: TropluxData = dadosTroplux as TropluxData;
 
+type HistoricoItem = {
+  azimute: number;
+  elevacao: number;
+  medido: number;
+  percentual: string;
+};
+
 export default function App() {
   // Tipagem dos estados
   const [azimute, setAzimute] = useState<number>(0);
   const [elevacao, setElevacao] = useState<number>(0);
-  const [resultadoDestaque, setResultadoDestaque] = useState<string>("0");
+  
+  // Estados para os valores da tela
+  const [medido, setMedido] = useState<number>(0);
+  const [historico, setHistorico] = useState<HistoricoItem[]>([]);
+
+  // Calcula o melhor valor (máximo) disponível no JSON apenas uma vez na inicialização
+  const melhorValor = useMemo(() => {
+    let max = 0;
+    for (const az in dados) {
+      for (const el in dados[az]) {
+        if (dados[az][el] > max) {
+          max = dados[az][el];
+        }
+      }
+    }
+    return max;
+  }, []);
 
   useEffect(() => {
     Magnetometer.setUpdateInterval(150);
@@ -57,38 +80,105 @@ export default function App() {
     const valorEncontrado = dados[chaveAzimute]?.[chaveElevacao];
 
     if (valorEncontrado !== undefined) {
-      setResultadoDestaque(valorEncontrado.toString());
+      setMedido(valorEncontrado);
     } else {
-      setResultadoDestaque("--");
+      setMedido(0);
     }
   }, [azimute, elevacao]);
 
+  // Calcula o percentual
+  const percentualNum = melhorValor > 0 ? (medido / melhorValor) * 100 : 0;
+  const percentualStr = percentualNum.toFixed(0);
+
+  // Função para salvar no histórico
+  const salvarHistorico = () => {
+    const novoItem: HistoricoItem = {
+      azimute,
+      elevacao,
+      medido,
+      percentual: `${percentualStr}%`,
+    };
+    // Adiciona no início da lista
+    setHistorico([novoItem, ...historico]);
+  };
+
+  // Função para restaurar/limpar histórico
+  const limparHistorico = () => {
+    setHistorico([]);
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Leitura Troplux</Text>
-
-      {/* RESULTADO EM DESTAQUE */}
-      <View style={styles.cardDestaque}>
-        <Text style={styles.labelDestaque}>VALOR MEDIDO</Text>
-        <Text style={styles.valorDestaque}>{resultadoDestaque}</Text>
+      {/* Top Banner: Percentage */}
+      <View style={styles.topBox}>
+        <Text style={styles.topBoxText}>{percentualStr}%</Text>
       </View>
 
-      {/* SENSORES MENORES EM BAIXO */}
-      <View style={styles.linhaSensores}>
-        <View style={styles.cardMenor}>
-          <Text style={styles.labelSensores}>Azimute (Horizontal)</Text>
-          <Text style={styles.valorSensores}>{azimute}°</Text>
+      {/* Grid: Medido, Melhor, Azimute, Vertical */}
+      <View style={styles.gridContainer}>
+        <View style={styles.gridRow}>
+          <View style={styles.gridBox}>
+            <Text style={styles.boxLabel}>MEDIDO</Text>
+            <Text style={styles.boxValue}>
+              {medido > 0 ? medido.toFixed(3) : "--"}
+            </Text>
+          </View>
+          <View style={styles.gridBox}>
+            <Text style={styles.boxLabel}>MELHOR</Text>
+            <Text style={styles.boxValue}>
+              {melhorValor > 0 ? melhorValor.toFixed(3) : "--"}
+            </Text>
+          </View>
         </View>
-
-        <View style={styles.cardMenor}>
-          <Text style={styles.labelSensores}>Elevação (Vertical)</Text>
-          <Text style={styles.valorSensores}>{elevacao}°</Text>
+        <View style={styles.gridRow}>
+          <View style={styles.gridBox}>
+            <Text style={styles.boxLabel}>AZIMUTE</Text>
+            <Text style={styles.boxValue}>{azimute}°</Text>
+          </View>
+          <View style={styles.gridBox}>
+            <Text style={styles.boxLabel}>VERTICAL</Text>
+            <Text style={styles.boxValue}>{elevacao}°</Text>
+          </View>
         </View>
       </View>
 
-      <Text style={styles.instrucao}>
-        Mova o celular para atualizar os valores em tempo real
-      </Text>
+      {/* Table Header */}
+      <View style={styles.tableHeader}>
+        <Text style={[styles.tableHeaderText, { flex: 1 }]}>AZI...</Text>
+        <Text style={[styles.tableHeaderText, { flex: 1 }]}>VER...</Text>
+        <Text style={[styles.tableHeaderText, { flex: 2, textAlign: "center" }]}>MEDIDO</Text>
+        <Text style={[styles.tableHeaderText, { flex: 1 }]}></Text>
+      </View>
+
+      {/* Table Rows */}
+      <ScrollView style={styles.tableContainer}>
+        {historico.map((item, index) => {
+          // Destaca a primeira linha (mais recente) em azul
+          const rowColor = index === 0 ? "#3b82f6" : "#ffffff";
+          return (
+            <View key={index} style={styles.tableRow}>
+              <Text style={[styles.tableRowText, { color: rowColor, flex: 1 }]}>{item.azimute}°</Text>
+              <Text style={[styles.tableRowText, { color: rowColor, flex: 1 }]}>{item.elevacao}°</Text>
+              <Text style={[styles.tableRowText, { color: rowColor, flex: 2, textAlign: "center" }]}>
+                {item.medido.toFixed(3)}
+              </Text>
+              <Text style={[styles.tableRowText, { color: rowColor, flex: 1, textAlign: "right" }]}>
+                {item.percentual}
+              </Text>
+            </View>
+          );
+        })}
+      </ScrollView>
+
+      {/* Bottom Buttons */}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={limparHistorico}>
+          <Text style={styles.buttonText}>RESTAURAR</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={salvarHistorico}>
+          <Text style={styles.buttonText}>SALVAR</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -96,70 +186,92 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0a0a0a",
+    backgroundColor: "#000000",
+    padding: 20,
+    paddingTop: 60,
+  },
+  topBox: {
+    borderWidth: 2,
+    borderColor: "#ffffff",
+    paddingVertical: 20,
     alignItems: "center",
     justifyContent: "center",
-    padding: 20,
+    marginBottom: 20,
+    borderRadius: 2,
   },
-  titulo: {
-    fontSize: 22,
-    fontWeight: "bold",
+  topBoxText: {
     color: "#ffffff",
-    marginBottom: 40,
+    fontSize: 72,
+    fontWeight: "bold",
   },
-  cardDestaque: {
-    backgroundColor: "#262626",
-    padding: 40,
-    borderRadius: 20,
-    width: "100%",
-    alignItems: "center",
+  gridContainer: {
     marginBottom: 30,
-    borderWidth: 2,
-    borderColor: "#ffdd00",
-    shadowColor: "#ffdd00",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 15,
   },
-  labelDestaque: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#ffdd00",
-    letterSpacing: 2,
-    marginBottom: 10,
-  },
-  valorDestaque: {
-    fontSize: 56,
-    fontWeight: "bold",
-    color: "#ffffff",
-  },
-  linhaSensores: {
+  gridRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: "100%",
+    marginBottom: 10,
   },
-  cardMenor: {
-    backgroundColor: "#1a1a1a",
-    padding: 20,
-    borderRadius: 15,
+  gridBox: {
     width: "48%",
+    borderWidth: 2,
+    borderColor: "#ffffff",
+    paddingVertical: 15,
     alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 2,
   },
-  labelSensores: {
-    fontSize: 12,
-    color: "#888888",
-    textAlign: "center",
-    marginBottom: 5,
-  },
-  valorSensores: {
-    fontSize: 28,
+  boxLabel: {
+    color: "#ffffff",
+    fontSize: 16,
     fontWeight: "bold",
-    color: "#00ffcc",
+    marginBottom: 5,
+    textTransform: "uppercase",
   },
-  instrucao: {
-    marginTop: 40,
-    fontSize: 14,
-    color: "#555555",
-    textAlign: "center",
+  boxValue: {
+    color: "#ffffff",
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  tableHeader: {
+    flexDirection: "row",
+    paddingHorizontal: 10,
+    marginBottom: 15,
+  },
+  tableHeaderText: {
+    color: "#ffffff",
+    fontSize: 18,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+  },
+  tableContainer: {
+    flex: 1,
+  },
+  tableRow: {
+    flexDirection: "row",
+    paddingHorizontal: 10,
+    marginBottom: 20,
+  },
+  tableRowText: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingVertical: 20,
+  },
+  button: {
+    borderWidth: 2,
+    borderColor: "#ffffff",
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 25,
+  },
+  buttonText: {
+    color: "#ffffff",
+    fontSize: 18,
+    fontWeight: "bold",
+    textTransform: "uppercase",
   },
 });
