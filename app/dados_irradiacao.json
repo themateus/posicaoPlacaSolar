@@ -1,5 +1,5 @@
 {
-  "Global - Aracaju": [
+  "Aracaju": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -1846,7 +1846,7 @@
       "valor": 18561.3
     }
   ],
-  "Global - Maceió": [
+  "Maceió": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -3698,7 +3698,7 @@
       "valor": 17941.0
     }
   ],
-  "Global - Natal": [
+  "Natal": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -5545,7 +5545,7 @@
       "valor": 17941.0
     }
   ],
-  "Global - Rio de Janeiro": [
+  "Rio de Janeiro": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -7397,7 +7397,7 @@
       "valor": 13483.0
     }
   ],
-  "Global- São Paulo": [
+  "São Paulo": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -9249,7 +9249,7 @@
       "valor": 14659.0
     }
   ],
-  "Global - Brasília": [
+  "Brasília": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -11101,7 +11101,7 @@
       "valor": 16324.2
     }
   ],
-  "Global- Goiânia": [
+  "Goiânia": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -12948,7 +12948,7 @@
       "valor": 16574.2
     }
   ],
-  "Global- Curitiba": [
+  "Curitiba": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -14800,7 +14800,7 @@
       "valor": 15989.8
     }
   ],
-  "Global-Florianópolis": [
+  "Florianópolis": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -16652,7 +16652,7 @@
       "valor": 14889.8
     }
   ],
-  "Global - Belo Horizonte": [
+  "Belo Horizonte": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -18504,7 +18504,7 @@
       "valor": 16264.8
     }
   ],
-  "Global-Cuiabá": [
+  "Cuiabá": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -20356,7 +20356,7 @@
       "valor": 14975.6
     }
   ],
-  "Global- Manaus": [
+  "Manaus": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -22208,7 +22208,7 @@
       "valor": 18135.4
     }
   ],
-  "Global-Rio Branco": [
+  "Rio Branco": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -24060,7 +24060,7 @@
       "valor": 17297.8
     }
   ],
-  "Global- Boa Vista": [
+  "Boa Vista": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -25912,7 +25912,7 @@
       "valor": 17369.9
     }
   ],
-  "Global - São Luís": [
+  "São Luís": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -27764,7 +27764,7 @@
       "valor": 17856.6
     }
   ],
-  "Global - Palmas": [
+  "Palmas": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -29616,7 +29616,7 @@
       "valor": 17784.5
     }
   ],
-  "Global - Teresina": [
+  "Teresina": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -31468,7 +31468,7 @@
       "valor": 15456.1
     }
   ],
-  "global- fortaleza": [
+  "Fortaleza": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -33320,7 +33320,7 @@
       "valor": 16796.4
     }
   ],
-  "Global - João Pessoa": [
+  "João Pessoa": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -35172,7 +35172,7 @@
       "valor": 17856.6
     }
   ],
-  "Global - Recife": [
+  "Recife": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -37024,7 +37024,7 @@
       "valor": 19771.1
     }
   ],
-  "Global - Salvador": [
+  "Salvador": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -38876,7 +38876,7 @@
       "valor": 16988.5
     }
   ],
-  "Global - Belém": [
+  "Belém": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -40728,7 +40728,7 @@
       "valor": 17369.9
     }
   ],
-  "Global - Macapá": [
+  "Macapá": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -42580,7 +42580,7 @@
       "valor": 23287.0
     }
   ],
-  "Global - Vitória": [
+  "Vitória": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -44432,7 +44432,7 @@
       "valor": 13611.0
     }
   ],
-  "Global - Porto Alegre": [
+  "Porto Alegre": [
     {
       "azimute": 0.0,
       "elevacao": 0.0,
@@ -46282,53 +46282,6 @@
       "azimute": 360.0,
       "elevacao": 90.0,
       "valor": 10431.0
-    }
-  ],
-  "Informações": [
-    {
-      "azimute": 10.0,
-      "elevacao": 0.0,
-      "valor": 17632.69807
-    },
-    {
-      "azimute": 20.0,
-      "elevacao": 0.0,
-      "valor": 36400.0
-    },
-    {
-      "azimute": 30.0,
-      "elevacao": 0.0,
-      "valor": 57735.02692
-    },
-    {
-      "azimute": 40.0,
-      "elevacao": 0.0,
-      "valor": 83909.96312
-    },
-    {
-      "azimute": 50.0,
-      "elevacao": 0.0,
-      "valor": 119.17536
-    },
-    {
-      "azimute": 60.0,
-      "elevacao": 0.0,
-      "valor": 173.20508
-    },
-    {
-      "azimute": 70.0,
-      "elevacao": 0.0,
-      "valor": 274.74774
-    },
-    {
-      "azimute": 80.0,
-      "elevacao": 0.0,
-      "valor": 567.12818
-    },
-    {
-      "azimute": 90.0,
-      "elevacao": 0.0,
-      "valor": 1.63312e+18
     }
   ]
 }
