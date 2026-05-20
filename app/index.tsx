@@ -112,7 +112,7 @@ function ArcProgress({ pct }: { pct: number }) {
       />
       <View style={arc.center}>
         <Text style={arc.label}>EFICIÊNCIA</Text>
-        <Text style={[arc.value, { color }]}>{clamp.toFixed(0)}%</Text>
+        <Text style={[arc.value, { color }]}>{clamp.toFixed(1)}%</Text>
       </View>
     </View>
   );
@@ -224,7 +224,7 @@ function HistoricoRow({
   isFirst: boolean;
   onPress: () => void;
 }) {
-  const pct = parseInt(item.percentual, 10);
+  const pct = parseFloat(item.percentual);
   const barColor = pct >= 70 ? C.amber : pct >= 40 ? "#FBBF24" : C.blue;
 
   return (
@@ -389,7 +389,7 @@ export default function App() {
   }, [azimute, elevacao, cidadeSelecionada]);
 
   const pctNum = melhorValor > 0 ? (medido / melhorValor) * 100 : 0;
-  const pctStr = pctNum.toFixed(0);
+  const pctStr = pctNum.toFixed(1);
 
   const cidadeExibida = cidadeSelecionada
     .replace("Global - ", "")
