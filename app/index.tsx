@@ -1,4 +1,5 @@
 import { File, Paths } from "expo-file-system/next";
+import { Image } from "expo-image";
 import * as Location from "expo-location";
 import { Accelerometer, Magnetometer } from "expo-sensors";
 import * as Sharing from "expo-sharing";
@@ -15,13 +16,15 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 import dadosCidadesJson from "./dados_irradiacao.json";
 
-const C = {
+// ─── Paletas escuro / claro ───────────────────────────────────────────────────
+const DARK = {
   bg: "#080C18",
   surface: "#0F1628",
   card: "#141C32",
@@ -29,14 +32,57 @@ const C = {
   amber: "#F59E0B",
   amberDim: "#F59E0B26",
   amberMid: "#F59E0B60",
+  yellow: "#EAB308",
+  yellowDim: "#EAB30826",
+  yellowMid: "#EAB30860",
   blue: "#3B82F6",
   blueDim: "#3B82F620",
+  green: "#22C55E",
+  greenDim: "#22C55E26",
+  greenMid: "#22C55E60",
   white: "#FFFFFF",
-  grey1: "#94A3B8",
+  text: "#FFFFFF",
+  textSub: "#94A3B8",
   grey2: "#334155",
   danger: "#EF4444",
+  dangerDim: "#EF444426",
+  dangerMid: "#EF444460",
+  isDark: true,
 };
 
+const LIGHT = {
+  bg: "#F0F4FF",
+  surface: "#FFFFFF",
+  card: "#FFFFFF",
+  border: "#CBD5E1",
+  amber: "#D97706",
+  amberDim: "#D9770618",
+  amberMid: "#D9770650",
+  yellow: "#EAB308",
+  yellowDim: "#EAB30818",
+  yellowMid: "#EAB30850",
+  blue: "#2563EB",
+  blueDim: "#2563EB18",
+  green: "#16A34A",
+  greenDim: "#16A34A18",
+  greenMid: "#16A34A50",
+  white: "#FFFFFF",
+  text: "#0F172A",
+  textSub: "#64748B",
+  grey2: "#CBD5E1",
+  danger: "#DC2626",
+  dangerDim: "#DC262618",
+  dangerMid: "#DC262650",
+  isDark: false,
+};
+
+function getEfficiencyColors(pct: number, T: typeof DARK) {
+  if (pct >= 70) return { base: T.green, dim: T.greenDim, mid: T.greenMid };
+  if (pct >= 40) return { base: T.yellow, dim: T.yellowDim, mid: T.yellowMid };
+  return { base: T.danger, dim: T.dangerDim, mid: T.dangerMid };
+}
+
+// ─── Coordenadas ──────────────────────────────────────────────────────────────
 const COORDENADAS_CIDADES: Record<string, { lat: number; lon: number }> = {
   Aracaju: { lat: -10.9472, lon: -37.0731 },
   Belém: { lat: -1.4558, lon: -48.5044 },
@@ -92,27 +138,145 @@ type HistoricoItem = {
   medido: number;
   percentual: string;
 };
+type Tema = typeof DARK;
 
 const dados: DadosCidades = dadosCidadesJson as DadosCidades;
 const listaCidades = Object.keys(dados).sort();
 
-// ─── Arco de progresso SVG-style via View rotacionadas ───────────────────────
-function ArcProgress({ pct }: { pct: number }) {
-  const clamp = Math.min(100, Math.max(0, pct));
-  const color = clamp >= 70 ? C.amber : clamp >= 40 ? "#FBBF24" : C.blue;
+// ─── Splash Screen ────────────────────────────────────────────────────────────
+function SplashScreen({ onDone }: { onDone: () => void }) {
+  const fade1 = useRef(new Animated.Value(1)).current;
+  const fade2 = useRef(new Animated.Value(0)).current;
+  const fadeOut = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const t1 = setTimeout(() => {
+      Animated.sequence([
+        Animated.timing(fade1, {
+          toValue: 0,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fade2, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }, 1500);
+
+    const t2 = setTimeout(() => {
+      Animated.timing(fadeOut, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }).start(() => onDone());
+    }, 4500);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, []);
 
   return (
-    <View style={arc.wrap}>
-      <View style={arc.track} />
+    <Animated.View
+      style={[
+        splash.container,
+        { opacity: fadeOut, backgroundColor: "#FFFFFF" },
+      ]}
+    >
+      <Animated.View
+        style={[splash.content, { position: "absolute", opacity: fade1 }]}
+      >
+        <Image
+          source={require("../assets/images/TPanel.png")}
+          style={{ width: 240, height: 240 }}
+          contentFit="contain"
+        />
+      </Animated.View>
+
+      <Animated.View
+        style={[splash.content, { position: "absolute", opacity: fade2 }]}
+      >
+        <Image
+          source={require("../assets/images/ufs_horizontal_positiva.png")}
+          style={{ width: 280, height: 100, marginBottom: 50 }}
+          contentFit="contain"
+        />
+        <Image
+          source={require("../assets/images/logoGRILUU.png")}
+          style={{ width: 280, height: 280 }}
+          contentFit="contain"
+        />
+      </Animated.View>
+    </Animated.View>
+  );
+}
+
+const splash = StyleSheet.create({
+  container: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#080C18",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 999,
+  },
+  content: { alignItems: "center", paddingHorizontal: 32 },
+  logosRow: { flexDirection: "row", alignItems: "center", marginBottom: 40 },
+  logoBox: { alignItems: "center" },
+  logoLeft: { marginRight: 16 },
+  logoRight: { marginLeft: 16 },
+  logoDivider: { width: 1, height: 60, backgroundColor: "#1E2A45" },
+  logoPlaceholder: { fontSize: 44, marginBottom: 6 },
+  logoName: {
+    color: "#94A3B8",
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 1,
+  },
+  appName: {
+    color: "#FFFFFF",
+    fontSize: 32,
+    fontWeight: "900",
+    letterSpacing: -0.5,
+    marginBottom: 10,
+  },
+  tagline: {
+    color: "#94A3B8",
+    fontSize: 14,
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 48,
+  },
+  dotsRow: { flexDirection: "row", gap: 8 },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "#1E2A45" },
+  dotActive: { backgroundColor: "#F59E0B", width: 20 },
+});
+
+// ─── Barra de progresso de eficiência ────────────────────────────────────────
+function ArcProgress({ pct, C: T }: { pct: number; C: Tema }) {
+  const clamp = Math.min(100, Math.max(0, pct));
+  const colors = getEfficiencyColors(clamp, T);
+
+  return (
+    <View
+      style={[arc.wrap, { backgroundColor: T.card, borderColor: T.border }]}
+    >
+      <View style={[arc.track, { backgroundColor: T.border }]} />
       <View
         style={[
           arc.fill,
-          { width: `${clamp}%` as any, backgroundColor: color },
+          { width: `${clamp}%` as any, backgroundColor: colors.base },
         ]}
       />
       <View style={arc.center}>
-        <Text style={arc.label}>EFICIÊNCIA</Text>
-        <Text style={[arc.value, { color }]}>{clamp.toFixed(1)}%</Text>
+        <Text style={[arc.label, { color: T.textSub }]}>
+          EFICIÊNCIA RELATIVA
+        </Text>
+        <Text style={[arc.value, { color: colors.base }]}>
+          {clamp.toFixed(1)}%
+        </Text>
       </View>
     </View>
   );
@@ -122,61 +286,52 @@ const arc = StyleSheet.create({
   wrap: {
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 20,
-    backgroundColor: C.card,
+    marginBottom: 14,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: C.border,
-    paddingVertical: 20,
+    paddingVertical: 18,
     paddingHorizontal: 16,
   },
-  track: {
-    width: "100%",
-    height: 8,
-    backgroundColor: C.border,
-    borderRadius: 4,
-    marginBottom: 12,
-  },
-  fill: {
-    position: "absolute",
-    top: 20,
-    left: 16,
-    height: 8,
-    borderRadius: 4,
-  },
-  center: {
-    alignItems: "center",
-    marginTop: 8,
-  },
+  track: { width: "100%", height: 8, borderRadius: 4, marginBottom: 12 },
+  fill: { position: "absolute", top: 18, left: 16, height: 8, borderRadius: 4 },
+  center: { alignItems: "center", marginTop: 6 },
   label: {
-    color: C.grey1,
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "700",
     letterSpacing: 2,
     textTransform: "uppercase",
     marginBottom: 2,
   },
-  value: {
-    fontSize: 64,
-    fontWeight: "900",
-    letterSpacing: -2,
-  },
+  value: { fontSize: 60, fontWeight: "900", letterSpacing: -2 },
 });
 
 // ─── Card de métrica ──────────────────────────────────────────────────────────
 function MetricCard({
   label,
   value,
-  accent,
+  pct,
+  C: T,
 }: {
   label: string;
   value: string;
-  accent?: boolean;
+  pct?: number;
+  C: Tema;
 }) {
+  const isAccent = pct !== undefined;
+  const colors = isAccent ? getEfficiencyColors(pct, T) : null;
+
   return (
-    <View style={[mc.card, accent && mc.cardAccent]}>
-      <Text style={mc.label}>{label}</Text>
-      <Text style={[mc.value, accent && mc.valueAccent]}>{value}</Text>
+    <View
+      style={[
+        mc.card,
+        { backgroundColor: T.card, borderColor: T.border },
+        isAccent && { borderColor: colors!.mid, backgroundColor: colors!.dim },
+      ]}
+    >
+      <Text style={[mc.label, { color: T.textSub }]}>{label}</Text>
+      <Text style={[mc.value, { color: isAccent ? colors!.base : T.text }]}>
+        {value}
+      </Text>
     </View>
   );
 }
@@ -184,70 +339,72 @@ function MetricCard({
 const mc = StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor: C.card,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: C.border,
-    paddingVertical: 14,
+    paddingVertical: 13,
     paddingHorizontal: 12,
     alignItems: "center",
   },
-  cardAccent: {
-    borderColor: C.amberMid,
-    backgroundColor: C.amberDim,
-  },
   label: {
-    color: C.grey1,
     fontSize: 10,
     fontWeight: "700",
     letterSpacing: 1.5,
     textTransform: "uppercase",
     marginBottom: 4,
   },
-  value: {
-    color: C.white,
-    fontSize: 22,
-    fontWeight: "800",
-  },
-  valueAccent: {
-    color: C.amber,
-  },
+  value: { fontSize: 22, fontWeight: "800" },
 });
 
-// ─── Linha da tabela ──────────────────────────────────────────────────────────
+// ─── Linha do histórico ───────────────────────────────────────────────────────
 function HistoricoRow({
   item,
   isFirst,
   onPress,
+  C: T,
 }: {
   item: HistoricoItem;
   isFirst: boolean;
   onPress: () => void;
+  C: Tema;
 }) {
   const pct = parseFloat(item.percentual);
-  const barColor = pct >= 70 ? C.amber : pct >= 40 ? "#FBBF24" : C.blue;
+  const barColor = pct >= 70 ? T.green : pct >= 40 ? "#EAB308" : T.danger;
 
   return (
     <TouchableOpacity
-      style={[hr.row, isFirst && hr.rowFirst]}
+      style={[
+        hr.row,
+        { backgroundColor: T.card, borderColor: T.border },
+        isFirst && { borderColor: T.amberMid, backgroundColor: T.amberDim },
+      ]}
       onPress={onPress}
       activeOpacity={0.7}
     >
       <View style={hr.nameCol}>
-        <Text style={[hr.name, isFirst && hr.nameFirst]} numberOfLines={1}>
+        <Text
+          style={[hr.name, { color: isFirst ? T.text : T.textSub }]}
+          numberOfLines={1}
+        >
           {item.nome}
         </Text>
-        <View style={hr.miniBar}>
+        <View style={[hr.miniBar, { backgroundColor: T.border }]}>
           <View
             style={[
               hr.miniBarFill,
-              { width: `${pct}%` as any, backgroundColor: barColor },
+              {
+                width: `${Math.min(pct, 100)}%` as any,
+                backgroundColor: barColor,
+              },
             ]}
           />
         </View>
       </View>
-      <Text style={[hr.cell, isFirst && hr.cellFirst]}>{item.azimute}°</Text>
-      <Text style={[hr.cell, isFirst && hr.cellFirst]}>{item.elevacao}°</Text>
+      <Text style={[hr.cell, { color: isFirst ? T.text : T.textSub }]}>
+        {item.azimute.toFixed(1)}°
+      </Text>
+      <Text style={[hr.cell, { color: isFirst ? T.text : T.textSub }]}>
+        {item.elevacao.toFixed(1)}°
+      </Text>
       <Text style={[hr.pct, { color: barColor }]}>{item.percentual}</Text>
     </TouchableOpacity>
   );
@@ -261,45 +418,36 @@ const hr = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 10,
     marginBottom: 6,
-    backgroundColor: C.card,
     borderWidth: 1,
-    borderColor: C.border,
   },
-  rowFirst: {
-    borderColor: C.amberMid,
-    backgroundColor: C.amberDim,
-  },
-  nameCol: { flex: 1.1, marginRight: 6 },
-  name: { color: C.grey1, fontSize: 13, fontWeight: "600", marginBottom: 4 },
-  nameFirst: { color: C.white, fontWeight: "700" },
-  miniBar: {
-    height: 3,
-    backgroundColor: C.border,
-    borderRadius: 2,
-    overflow: "hidden",
-  },
+  nameCol: { flex: 1.4, marginRight: 8 },
+  name: { fontSize: 13, fontWeight: "600", marginBottom: 4 },
+  miniBar: { height: 3, borderRadius: 2, overflow: "hidden" },
   miniBarFill: { height: 3, borderRadius: 2 },
-  cell: {
-    flex: 0.95,
-    color: C.grey1,
-    fontSize: 12,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  cellFirst: { color: C.white, fontWeight: "700" },
-  pct: { flex: 1, fontSize: 13, fontWeight: "800", textAlign: "right" },
+  cell: { flex: 0.9, fontSize: 13, fontWeight: "600", textAlign: "center" },
+  pct: { flex: 0.9, fontSize: 14, fontWeight: "800", textAlign: "right" },
 });
 
-// ─── App principal ────────────────────────────────────────────────────────────
+// ─── Ícone SVG de compartilhar (via texto Unicode) ────────────────────────────
+function ShareIcon({ color }: { color: string }) {
+  return <Text style={{ color, fontSize: 18, fontWeight: "700" }}>{"⬆"}</Text>;
+}
+
+// ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
+  const systemScheme = useColorScheme();
+  const [temaManual, setTemaManual] = useState<"dark" | "light" | null>(null);
+  const tema = temaManual ?? systemScheme ?? "dark";
+  const T = tema === "dark" ? DARK : LIGHT;
+
   const cidadeInicial =
     listaCidades.find((c) => c.toLowerCase().includes("aracaju")) ||
     listaCidades[0] ||
     "";
-
   const [cidadeSelecionada, setCidadeSelecionada] = useState(cidadeInicial);
   const [modalCidadeVisivel, setModalCidadeVisivel] = useState(false);
   const [carregandoLocalizacao, setCarregandoLocalizacao] = useState(true);
+  const [splashVisivel, setSplashVisivel] = useState(true);
 
   const [azimute, setAzimute] = useState(0);
   const [elevacao, setElevacao] = useState(0);
@@ -316,10 +464,10 @@ export default function App() {
 
   const melhorValor = useMemo(() => {
     const d = dados[cidadeSelecionada];
-    if (!d || d.length === 0) return 0;
-    return Math.max(...d.map((i) => i.valor));
+    return d && d.length > 0 ? Math.max(...d.map((i) => i.valor)) : 0;
   }, [cidadeSelecionada]);
 
+  // Auto-detectar cidade
   useEffect(() => {
     (async () => {
       try {
@@ -328,48 +476,48 @@ export default function App() {
           setCarregandoLocalizacao(false);
           return;
         }
-        const location = await Location.getCurrentPositionAsync({});
-        const { latitude, longitude } = location.coords;
-        let menorDist = Infinity;
-        let melhor = cidadeInicial;
+        const loc = await Location.getCurrentPositionAsync({});
+        const { latitude, longitude } = loc.coords;
+        let best = cidadeInicial,
+          bestDist = Infinity;
         listaCidades.forEach((cj) => {
           const nome = Object.keys(COORDENADAS_CIDADES).find((c) =>
             cj.includes(c),
           );
           if (nome) {
-            const d = calcularDistancia(
+            const dist = calcularDistancia(
               latitude,
               longitude,
               COORDENADAS_CIDADES[nome].lat,
               COORDENADAS_CIDADES[nome].lon,
             );
-            if (d < menorDist) {
-              menorDist = d;
-              melhor = cj;
+            if (dist < bestDist) {
+              bestDist = dist;
+              best = cj;
             }
           }
         });
-        setCidadeSelecionada(melhor);
+        setCidadeSelecionada(best);
       } catch {
+        /* fallback */
       } finally {
         setCarregandoLocalizacao(false);
       }
     })();
   }, []);
 
+  // Sensores
   useEffect(() => {
     Magnetometer.setUpdateInterval(150);
     Accelerometer.setUpdateInterval(150);
     const mag = Magnetometer.addListener(({ x, y }) => {
       let a = Math.atan2(y, x) * (180 / Math.PI);
       if (a < 0) a += 360;
-      setAzimute(Math.round(a));
+      setAzimute(a);
     });
     const acc = Accelerometer.addListener(({ x, y, z }) => {
       setElevacao(
-        Math.round(
-          Math.abs(Math.atan2(y, Math.sqrt(x * x + z * z)) * (180 / Math.PI)),
-        ),
+        Math.abs(Math.atan2(y, Math.sqrt(x * x + z * z)) * (180 / Math.PI)),
       );
     });
     return () => {
@@ -378,9 +526,10 @@ export default function App() {
     };
   }, []);
 
+  // Lookup
   useEffect(() => {
-    let az = Math.min(360, Math.round(azimute / 10) * 10);
-    let el = Math.min(90, Math.round(elevacao / 10) * 10);
+    const az = Math.min(360, Math.round(azimute / 10) * 10);
+    const el = Math.min(90, Math.round(elevacao / 10) * 10);
     const d = dados[cidadeSelecionada];
     if (d) {
       const r = d.find((i) => i.azimute === az && i.elevacao === el);
@@ -389,8 +538,7 @@ export default function App() {
   }, [azimute, elevacao, cidadeSelecionada]);
 
   const pctNum = melhorValor > 0 ? (medido / melhorValor) * 100 : 0;
-  const pctStr = pctNum.toFixed(1);
-
+  const pctStr = `${pctNum.toFixed(1)}%`;
   const cidadeExibida = cidadeSelecionada
     .replace("Global - ", "")
     .replace(".html", "");
@@ -408,16 +556,17 @@ export default function App() {
         useNativeDriver: true,
       }),
     ]).start();
-
-    const novoItem: HistoricoItem = {
-      id: Date.now().toString(),
-      nome: `Medição ${historico.length + 1}`,
-      azimute,
-      elevacao,
-      medido,
-      percentual: `${pctStr}%`,
-    };
-    setHistorico((prev) => [novoItem, ...prev]);
+    setHistorico((prev) => [
+      {
+        id: Date.now().toString(),
+        nome: `Medição ${prev.length + 1}`,
+        azimute,
+        elevacao,
+        medido,
+        percentual: pctStr,
+      },
+      ...prev,
+    ]);
   };
 
   const abrirDetalhe = (item: HistoricoItem) => {
@@ -425,7 +574,6 @@ export default function App() {
     setNomeEditando(item.nome);
     setModalDetalheVisivel(true);
   };
-
   const salvarNome = () => {
     if (!itemSelecionado) return;
     setHistorico((prev) =>
@@ -434,27 +582,6 @@ export default function App() {
       ),
     );
     setModalDetalheVisivel(false);
-  };
-
-  const excluirMedicao = () => {
-    if (!itemSelecionado) return;
-    Alert.alert(
-      "Excluir medição",
-      `Tem certeza que deseja excluir "${itemSelecionado.nome}"?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: () => {
-            setHistorico((prev) =>
-              prev.filter((h) => h.id !== itemSelecionado.id),
-            );
-            setModalDetalheVisivel(false);
-          },
-        },
-      ],
-    );
   };
 
   const exportarCSV = async () => {
@@ -472,16 +599,16 @@ export default function App() {
       "Nome",
       "Azimute (graus)",
       "Elevacao (graus)",
-      "Medido",
-      "Eficiencia (%)",
+      "Previsto (lx)",
+      "Eficiencia Relativa (%)",
     ].join(sep);
     const lin = historico
       .map((i) =>
         [
           `"${norm(i.nome)}"`,
-          i.azimute,
-          i.elevacao,
-          i.medido.toFixed(2).replace(".", ","),
+          i.azimute.toFixed(1),
+          i.elevacao.toFixed(1),
+          i.medido > 0 ? Math.round(i.medido).toString() : "0",
           i.percentual.replace("%", "").trim(),
         ].join(sep),
       )
@@ -506,86 +633,183 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={s.safe} edges={["top", "bottom"]}>
-        <StatusBar barStyle="light-content" backgroundColor={C.bg} />
+      <StatusBar
+        barStyle={T.isDark ? "light-content" : "dark-content"}
+        backgroundColor={T.bg}
+      />
+
+      {/* ── Splash ── */}
+      {splashVisivel && <SplashScreen onDone={() => setSplashVisivel(false)} />}
+
+      <SafeAreaView
+        style={[s.safe, { backgroundColor: T.bg }]}
+        edges={["top", "bottom"]}
+      >
         <View style={s.container}>
-          {/* ── Topo: cidade ── */}
+          {/* ── Header ── */}
           <View style={s.header}>
-            <View style={s.headerLeft}>
-              <Text style={s.headerLabel}>LOCAL</Text>
+            {/* Logo placeholder esquerda */}
+            <View
+              style={[
+                s.logoSmall,
+                { backgroundColor: T.card, borderColor: T.border },
+              ]}
+            >
+              <Image
+                source={require("../assets/images/griloVetorizado.svg")}
+                style={{ width: 24, height: 24 }}
+                contentFit="contain"
+                tintColor={
+                  pctNum >= 70 ? T.green : pctNum >= 40 ? "#EAB308" : T.danger
+                }
+              />
+            </View>
+
+            {/* Cidade */}
+            <View style={s.headerCenter}>
+              <Text style={[s.headerLabel, { color: T.textSub }]}>LOCAL</Text>
               {carregandoLocalizacao ? (
-                <ActivityIndicator
-                  color={C.amber}
-                  size="small"
-                  style={{ marginTop: 2 }}
-                />
+                <ActivityIndicator color={T.amber} size="small" />
               ) : (
                 <TouchableOpacity
                   onPress={() => setModalCidadeVisivel(true)}
                   style={s.cityBtn}
                   activeOpacity={0.7}
                 >
-                  <Text style={s.cityText} numberOfLines={1}>
+                  <Text
+                    style={[s.cityText, { color: T.text }]}
+                    numberOfLines={1}
+                  >
                     📍 {cidadeExibida}
                   </Text>
-                  <Text style={s.cityChevron}>›</Text>
+                  <Text style={[s.cityChevron, { color: T.amber }]}>›</Text>
                 </TouchableOpacity>
               )}
             </View>
-            <TouchableOpacity
-              style={s.exportIconBtn}
-              onPress={exportarCSV}
-              activeOpacity={0.7}
-            >
-              <Text style={s.exportIcon}>↑</Text>
-            </TouchableOpacity>
+
+            {/* Botões direita: tema + exportar */}
+            <View style={s.headerActions}>
+              {/* Toggle tema */}
+              <TouchableOpacity
+                style={[
+                  s.iconBtn,
+                  { backgroundColor: T.card, borderColor: T.border },
+                ]}
+                onPress={() =>
+                  setTemaManual(tema === "dark" ? "light" : "dark")
+                }
+                activeOpacity={0.7}
+              >
+                {tema === "dark" ? (
+                  <Image
+                    source={require("../assets/images/sun-svgrepo-com.svg")}
+                    style={{ width: 20, height: 20 }}
+                    contentFit="contain"
+                    tintColor={T.text}
+                  />
+                ) : (
+                  <Image
+                    source={require("../assets/images/moon-svgrepo-com.svg")}
+                    style={{ width: 20, height: 20 }}
+                    contentFit="contain"
+                    tintColor={T.text}
+                  />
+                )}
+              </TouchableOpacity>
+
+              {/* Exportar */}
+              <TouchableOpacity
+                style={[
+                  s.iconBtn,
+                  { backgroundColor: T.amberDim, borderColor: T.amberMid },
+                ]}
+                onPress={exportarCSV}
+                activeOpacity={0.7}
+              >
+                <Image
+                  source={require("../assets/images/arrow-up-right-from-square-svgrepo-com.svg")}
+                  style={{ width: 18, height: 18 }}
+                  contentFit="contain"
+                  tintColor={T.amber}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
-          {/* ── Eficiência ── */}
-          <ArcProgress pct={pctNum} />
+          {/* ── Eficiência relativa ── */}
+          <ArcProgress pct={pctNum} C={T} />
 
-          {/* ── Grid de métricas ── */}
+          {/* ── Métricas ── */}
           <View style={s.metricRow}>
             <MetricCard
-              label="Medido"
-              value={medido > 0 ? medido.toFixed(3) : "—"}
+              label="Previsto (lx)"
+              value={medido > 0 ? Math.round(medido).toString() : "—"}
+              C={T}
             />
             <View style={{ width: 10 }} />
             <MetricCard
-              label="Melhor"
-              value={melhorValor > 0 ? melhorValor.toFixed(3) : "—"}
-              accent
+              label="Máximo (lx)"
+              value={melhorValor > 0 ? Math.round(melhorValor).toString() : "—"}
+              pct={100}
+              C={T}
             />
           </View>
-          <View style={[s.metricRow, { marginTop: 10, marginBottom: 18 }]}>
-            <MetricCard label="Azimute" value={`${azimute}°`} />
+          <View style={[s.metricRow, { marginTop: 10, marginBottom: 16 }]}>
+            <MetricCard
+              label="Azimute"
+              value={`${azimute.toFixed(1)}°`}
+              C={T}
+            />
             <View style={{ width: 10 }} />
-            <MetricCard label="Elevação" value={`${elevacao}°`} />
+            <MetricCard
+              label="Elevação"
+              value={`${elevacao.toFixed(1)}°`}
+              C={T}
+            />
           </View>
 
-          {/* ── Cabeçalho da tabela ── */}
+          {/* ── Cabeçalho tabela ── */}
           {historico.length > 0 && (
             <View style={s.tableHead}>
-              <Text style={[s.thText, { flex: 1.1 }]}>NOME</Text>
-              <Text style={[s.thText, { flex: 0.95, textAlign: "center" }]}>
+              <Text style={[s.thText, { color: T.textSub, flex: 1.4 }]}>
+                NOME
+              </Text>
+              <Text
+                style={[
+                  s.thText,
+                  { color: T.textSub, flex: 0.9, textAlign: "center" },
+                ]}
+              >
                 AZIMUTE
               </Text>
-              <Text style={[s.thText, { flex: 0.95, textAlign: "center" }]}>
+              <Text
+                style={[
+                  s.thText,
+                  { color: T.textSub, flex: 0.9, textAlign: "center" },
+                ]}
+              >
                 ELEVAÇÃO
               </Text>
-              <Text style={[s.thText, { flex: 1, textAlign: "right" }]}>
+              <Text
+                style={[
+                  s.thText,
+                  { color: T.textSub, flex: 0.9, textAlign: "right" },
+                ]}
+              >
                 EFICIÊNCIA
               </Text>
             </View>
           )}
 
-          {/* ── Lista de medições ── */}
+          {/* ── Lista ── */}
           <ScrollView style={s.list} showsVerticalScrollIndicator={false}>
             {historico.length === 0 ? (
               <View style={s.empty}>
-                <Text style={s.emptyIcon}>◎</Text>
-                <Text style={s.emptyText}>Nenhuma medição salva</Text>
-                <Text style={s.emptyHint}>
+                <Text style={[s.emptyIcon, { color: T.grey2 }]}>◎</Text>
+                <Text style={[s.emptyText, { color: T.textSub }]}>
+                  Nenhuma medição salva
+                </Text>
+                <Text style={[s.emptyHint, { color: T.grey2 }]}>
                   Aponte o dispositivo e toque em SALVAR
                 </Text>
               </View>
@@ -596,16 +820,17 @@ export default function App() {
                   item={item}
                   isFirst={idx === 0}
                   onPress={() => abrirDetalhe(item)}
+                  C={T}
                 />
               ))
             )}
           </ScrollView>
 
-          {/* ── Barra de ações ── */}
+          {/* ── Ações ── */}
           <View style={s.actionBar}>
             <TouchableOpacity
-              style={s.btnSecondary}
-              onPress={() => {
+              style={[s.btnSecondary, { borderColor: T.border }]}
+              onPress={() =>
                 Alert.alert(
                   "Limpar medições",
                   "Remover todas as medições salvas?",
@@ -617,11 +842,13 @@ export default function App() {
                       onPress: () => setHistorico([]),
                     },
                   ],
-                );
-              }}
+                )
+              }
               activeOpacity={0.7}
             >
-              <Text style={s.btnSecondaryText}>LIMPAR</Text>
+              <Text style={[s.btnSecondaryText, { color: T.textSub }]}>
+                LIMPAR
+              </Text>
             </TouchableOpacity>
 
             <Animated.View
@@ -632,17 +859,24 @@ export default function App() {
               }}
             >
               <TouchableOpacity
-                style={s.btnPrimary}
+                style={[s.btnPrimary, { backgroundColor: T.amber }]}
                 onPress={salvarHistorico}
                 activeOpacity={0.8}
               >
-                <Text style={s.btnPrimaryText}>SALVAR +</Text>
+                <Text
+                  style={[
+                    s.btnPrimaryText,
+                    { color: T.isDark ? "#080C18" : "#FFFFFF" },
+                  ]}
+                >
+                  SALVAR +
+                </Text>
               </TouchableOpacity>
             </Animated.View>
           </View>
         </View>
 
-        {/* ── Modal: selecionar cidade ── */}
+        {/* ── Modal cidade ── */}
         <Modal
           visible={modalCidadeVisivel}
           animationType="slide"
@@ -650,9 +884,11 @@ export default function App() {
           onRequestClose={() => setModalCidadeVisivel(false)}
         >
           <View style={m.overlay}>
-            <View style={m.sheet}>
-              <View style={m.handle} />
-              <Text style={m.title}>Selecionar cidade</Text>
+            <View style={[m.sheet, { backgroundColor: T.surface }]}>
+              <View style={[m.handle, { backgroundColor: T.border }]} />
+              <Text style={[m.title, { color: T.text }]}>
+                Selecionar cidade
+              </Text>
               <FlatList
                 data={listaCidades}
                 keyExtractor={(i) => i}
@@ -664,15 +900,27 @@ export default function App() {
                   const sel = cidadeSelecionada === item;
                   return (
                     <TouchableOpacity
-                      style={[m.item, sel && m.itemSel]}
+                      style={[
+                        m.item,
+                        { borderBottomColor: T.border },
+                        sel && { paddingHorizontal: 4 },
+                      ]}
                       onPress={() => {
                         setCidadeSelecionada(item);
                         setModalCidadeVisivel(false);
                       }}
                       activeOpacity={0.7}
                     >
-                      {sel && <Text style={m.itemDot}>● </Text>}
-                      <Text style={[m.itemText, sel && m.itemTextSel]}>
+                      {sel && (
+                        <Text style={[m.itemDot, { color: T.amber }]}>● </Text>
+                      )}
+                      <Text
+                        style={[
+                          m.itemText,
+                          { color: sel ? T.amber : T.textSub },
+                          sel && { fontWeight: "700" },
+                        ]}
+                      >
                         {nome}
                       </Text>
                     </TouchableOpacity>
@@ -680,17 +928,22 @@ export default function App() {
                 }}
               />
               <TouchableOpacity
-                style={m.closeBtn}
+                style={[
+                  m.closeBtn,
+                  { backgroundColor: T.card, borderColor: T.border },
+                ]}
                 onPress={() => setModalCidadeVisivel(false)}
                 activeOpacity={0.7}
               >
-                <Text style={m.closeBtnText}>Fechar</Text>
+                <Text style={[m.closeBtnText, { color: T.textSub }]}>
+                  Fechar
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
         </Modal>
 
-        {/* ── Modal: detalhe/editar medição ── */}
+        {/* ── Modal detalhe ── */}
         <Modal
           visible={modalDetalheVisivel}
           animationType="slide"
@@ -698,18 +951,27 @@ export default function App() {
           onRequestClose={() => setModalDetalheVisivel(false)}
         >
           <View style={m.overlay}>
-            <View style={m.sheet}>
-              <View style={m.handle} />
-              <Text style={m.title}>Detalhe da medição</Text>
+            <View style={[m.sheet, { backgroundColor: T.surface }]}>
+              <View style={[m.handle, { backgroundColor: T.border }]} />
+              <Text style={[m.title, { color: T.text }]}>
+                Detalhe da medição
+              </Text>
 
               {itemSelecionado && (
                 <>
-                  <Text style={d.label}>Nome</Text>
+                  <Text style={[d.label, { color: T.textSub }]}>Nome</Text>
                   <TextInput
-                    style={d.input}
+                    style={[
+                      d.input,
+                      {
+                        backgroundColor: T.card,
+                        borderColor: T.amber,
+                        color: T.text,
+                      },
+                    ]}
                     value={nomeEditando}
                     onChangeText={setNomeEditando}
-                    placeholderTextColor={C.grey2}
+                    placeholderTextColor={T.grey2}
                     placeholder="Nome da medição"
                     autoFocus
                     selectTextOnFocus
@@ -717,48 +979,124 @@ export default function App() {
 
                   <View style={d.grid}>
                     {[
-                      { l: "AZIMUTE", v: `${itemSelecionado.azimute}°` },
-                      { l: "ELEVAÇÃO", v: `${itemSelecionado.elevacao}°` },
-                      { l: "MEDIDO", v: itemSelecionado.medido.toFixed(3) },
                       {
-                        l: "EFICIÊNCIA",
-                        v: itemSelecionado.percentual,
-                        accent: true,
+                        l: "AZIMUTE",
+                        v: `${itemSelecionado.azimute.toFixed(1)}°`,
                       },
-                    ].map(({ l, v, accent }) => (
-                      <View key={l} style={d.card}>
-                        <Text style={d.cardLabel}>{l}</Text>
-                        <Text
-                          style={[d.cardValue, accent && d.cardValueAccent]}
-                        >
-                          {v}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
+                      {
+                        l: "ELEVAÇÃO",
+                        v: `${itemSelecionado.elevacao.toFixed(1)}°`,
+                      },
+                      {
+                        l: "PREVISTO (lx)",
+                        v:
+                          itemSelecionado.medido > 0
+                            ? Math.round(itemSelecionado.medido).toString()
+                            : "—",
+                      },
+                      {
+                        l: "MÁXIMO (lx)",
+                        v:
+                          melhorValor > 0
+                            ? Math.round(melhorValor).toString()
+                            : "—",
+                      },
+                      {
+                        l: "EFICIÊNCIA RELATIVA",
+                        v: itemSelecionado.percentual,
+                        pct: parseFloat(itemSelecionado.percentual),
+                      },
+                    ].map(({ l, v, pct }) => {
+                      const isAccent = pct !== undefined;
+                      const colors = isAccent
+                        ? getEfficiencyColors(pct, T)
+                        : null;
 
-                  <TouchableOpacity
-                    style={d.btnDelete}
-                    onPress={excluirMedicao}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={d.btnDeleteText}>Excluir medição</Text>
-                  </TouchableOpacity>
+                      return (
+                        <View
+                          key={l}
+                          style={[
+                            d.card,
+                            { backgroundColor: T.card, borderColor: T.border },
+                            isAccent && d.cardWide,
+                            isAccent && {
+                              borderColor: colors!.mid,
+                              backgroundColor: colors!.dim,
+                            },
+                          ]}
+                        >
+                          <Text style={[d.cardLabel, { color: T.textSub }]}>
+                            {l}
+                          </Text>
+                          <Text
+                            style={[
+                              d.cardValue,
+                              { color: isAccent ? colors!.base : T.text },
+                              isAccent && d.cardValueLarge,
+                            ]}
+                          >
+                            {v}
+                          </Text>
+                        </View>
+                      );
+                    })}
+                  </View>
 
                   <View style={d.actions}>
                     <TouchableOpacity
-                      style={d.btnCancel}
+                      style={d.btnDelete}
+                      onPress={() =>
+                        Alert.alert(
+                          "Excluir medição",
+                          `Excluir "${itemSelecionado.nome}"?`,
+                          [
+                            { text: "Cancelar", style: "cancel" },
+                            {
+                              text: "Excluir",
+                              style: "destructive",
+                              onPress: () => {
+                                setHistorico((prev) =>
+                                  prev.filter(
+                                    (h) => h.id !== itemSelecionado.id,
+                                  ),
+                                );
+                                setModalDetalheVisivel(false);
+                              },
+                            },
+                          ],
+                        )
+                      }
+                      activeOpacity={0.7}
+                    >
+                      <Image
+                        source={require("../assets/images/trash-xmark-alt-svgrepo-com.svg")}
+                        style={{ width: 22, height: 22 }}
+                        contentFit="contain"
+                        tintColor="#EF4444"
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[d.btnCancel, { borderColor: T.border }]}
                       onPress={() => setModalDetalheVisivel(false)}
                       activeOpacity={0.7}
                     >
-                      <Text style={d.btnCancelText}>Cancelar</Text>
+                      <Text style={[d.btnCancelText, { color: T.textSub }]}>
+                        Cancelar
+                      </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={d.btnSave}
+                      style={[d.btnSave, { backgroundColor: T.amber }]}
                       onPress={salvarNome}
                       activeOpacity={0.8}
                     >
-                      <Text style={d.btnSaveText}>Salvar</Text>
+                      <Text
+                        style={[
+                          d.btnSaveText,
+                          { color: T.isDark ? "#080C18" : "#FFFFFF" },
+                        ]}
+                      >
+                        Salvar
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </>
@@ -771,114 +1109,106 @@ export default function App() {
   );
 }
 
-// ─── Estilos globais ──────────────────────────────────────────────────────────
+// ─── Estilos ──────────────────────────────────────────────────────────────────
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: C.bg },
-  container: { flex: 1, paddingHorizontal: 16, paddingTop: 12 },
-  header: { flexDirection: "row", alignItems: "center", marginBottom: 16 },
-  headerLeft: { flex: 1 },
+  safe: { flex: 1 },
+  container: { flex: 1, paddingHorizontal: 16, paddingTop: 10 },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 14,
+    gap: 10,
+  },
+  logoSmall: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logoEmoji: { fontSize: 20 },
+  headerCenter: { flex: 1 },
   headerLabel: {
-    color: C.grey1,
     fontSize: 10,
     fontWeight: "700",
     letterSpacing: 1.5,
     textTransform: "uppercase",
-    marginBottom: 2,
+    marginBottom: 1,
   },
   cityBtn: { flexDirection: "row", alignItems: "center" },
-  cityText: { color: C.white, fontSize: 17, fontWeight: "700", flexShrink: 1 },
-  cityChevron: {
-    color: C.amber,
-    fontSize: 22,
-    marginLeft: 4,
-    fontWeight: "300",
-  },
-  exportIconBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: C.amberDim,
+  cityText: { fontSize: 16, fontWeight: "700", flexShrink: 1 },
+  cityChevron: { fontSize: 22, marginLeft: 4, fontWeight: "300" },
+  headerActions: { flexDirection: "row", gap: 8 },
+  iconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: C.amberMid,
     alignItems: "center",
     justifyContent: "center",
   },
-  exportIcon: { color: C.amber, fontSize: 20, fontWeight: "700" },
+  iconBtnShare: { width: 52, flexDirection: "column" },
+  shareArrow: { fontSize: 15, fontWeight: "900", lineHeight: 16 },
+  shareLabel: {
+    fontSize: 8,
+    fontWeight: "800",
+    letterSpacing: 0.5,
+    lineHeight: 11,
+  },
   metricRow: { flexDirection: "row" },
   tableHead: { flexDirection: "row", paddingHorizontal: 14, marginBottom: 6 },
   thText: {
-    color: C.grey1,
     fontSize: 9,
     fontWeight: "700",
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
     textTransform: "uppercase",
   },
   list: { flex: 1 },
-  empty: { alignItems: "center", paddingTop: 40, paddingBottom: 20 },
-  emptyIcon: { color: C.grey2, fontSize: 40, marginBottom: 12 },
-  emptyText: {
-    color: C.grey1,
-    fontSize: 15,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  emptyHint: { color: C.grey2, fontSize: 13 },
-  actionBar: { flexDirection: "row", paddingVertical: 14, paddingBottom: 20 },
+  empty: { alignItems: "center", paddingTop: 36, paddingBottom: 20 },
+  emptyIcon: { fontSize: 40, marginBottom: 12 },
+  emptyText: { fontSize: 15, fontWeight: "600", marginBottom: 4 },
+  emptyHint: { fontSize: 13 },
+  actionBar: { flexDirection: "row", paddingVertical: 12, paddingBottom: 8 },
   btnSecondary: {
     borderWidth: 1.5,
-    borderColor: C.border,
     borderRadius: 14,
     paddingVertical: 16,
     paddingHorizontal: 20,
     alignItems: "center",
     justifyContent: "center",
   },
-  btnSecondaryText: {
-    color: C.grey1,
-    fontSize: 13,
-    fontWeight: "700",
-    letterSpacing: 1,
-  },
+  btnSecondaryText: { fontSize: 13, fontWeight: "700", letterSpacing: 1 },
   btnPrimary: {
-    backgroundColor: C.amber,
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: "center",
     justifyContent: "center",
   },
-  btnPrimaryText: {
-    color: C.bg,
-    fontSize: 15,
-    fontWeight: "900",
-    letterSpacing: 1,
-  },
+  btnPrimaryText: { fontSize: 15, fontWeight: "900", letterSpacing: 1 },
 });
 
-// Modal sheets
 const m = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.7)",
+    backgroundColor: "rgba(0,0,0,0.65)",
     justifyContent: "flex-end",
   },
   sheet: {
-    backgroundColor: C.surface,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,
     paddingBottom: 36,
-    maxHeight: "85%",
+    maxHeight: "75%",
   },
   handle: {
     width: 40,
     height: 4,
-    backgroundColor: C.border,
     borderRadius: 2,
     alignSelf: "center",
     marginBottom: 16,
   },
   title: {
-    color: C.white,
     fontSize: 17,
     fontWeight: "800",
     marginBottom: 16,
@@ -889,28 +1219,21 @@ const m = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: C.border,
   },
-  itemSel: { paddingHorizontal: 4 },
-  itemDot: { color: C.amber, fontSize: 10 },
-  itemText: { color: C.grey1, fontSize: 16 },
-  itemTextSel: { color: C.amber, fontWeight: "700" },
+  itemDot: { fontSize: 10 },
+  itemText: { fontSize: 16 },
   closeBtn: {
     marginTop: 16,
-    backgroundColor: C.card,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: C.border,
   },
-  closeBtnText: { color: C.grey1, fontSize: 14, fontWeight: "700" },
+  closeBtnText: { fontSize: 14, fontWeight: "700" },
 });
 
-// Modal detalhe
 const d = StyleSheet.create({
   label: {
-    color: C.grey1,
     fontSize: 11,
     fontWeight: "700",
     letterSpacing: 1.5,
@@ -918,65 +1241,51 @@ const d = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: C.card,
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: C.amber,
-    color: C.white,
     fontSize: 17,
     fontWeight: "600",
     paddingVertical: 12,
     paddingHorizontal: 14,
     marginBottom: 20,
   },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 20 },
-  card: {
-    width: "47%",
-    backgroundColor: C.card,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: C.border,
-    padding: 14,
-  },
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 24 },
+  card: { width: "47%", borderRadius: 12, borderWidth: 1, padding: 14 },
+  cardWide: { width: "100%" },
   cardLabel: {
-    color: C.grey1,
     fontSize: 10,
     fontWeight: "700",
     letterSpacing: 1.5,
     textTransform: "uppercase",
     marginBottom: 4,
   },
-  cardValue: { color: C.white, fontSize: 26, fontWeight: "800" },
-  cardValueAccent: { color: C.amber },
-
-  // Botão de Excluir que adicionei
+  cardValue: { fontSize: 26, fontWeight: "800" },
+  cardValueLarge: { fontSize: 36 },
+  actions: { flexDirection: "row", gap: 10, alignItems: "center" },
   btnDelete: {
-    backgroundColor: C.danger + "15",
-    borderWidth: 1,
-    borderColor: C.danger,
+    width: 48,
+    height: 48,
     borderRadius: 12,
-    paddingVertical: 14,
+    backgroundColor: "#EF444420",
+    borderWidth: 1.5,
+    borderColor: "#EF4444",
     alignItems: "center",
-    marginBottom: 10,
+    justifyContent: "center",
   },
-  btnDeleteText: { color: C.danger, fontSize: 14, fontWeight: "700" },
-
-  actions: { flexDirection: "row", gap: 10 },
+  btnDeleteText: { fontSize: 18 },
   btnCancel: {
     flex: 1,
     borderWidth: 1.5,
-    borderColor: C.border,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: "center",
   },
-  btnCancelText: { color: C.grey1, fontSize: 14, fontWeight: "700" },
+  btnCancelText: { fontSize: 14, fontWeight: "700" },
   btnSave: {
     flex: 1,
-    backgroundColor: C.amber,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: "center",
   },
-  btnSaveText: { color: C.bg, fontSize: 14, fontWeight: "900" },
+  btnSaveText: { fontSize: 14, fontWeight: "900" },
 });
