@@ -81,19 +81,3 @@ O código principal está organizado da seguinte forma:
      ```bash
      npm run tunnel
      ```
-
----
-
-## 📊 Base de Dados e Metodologia
-
-O cálculo de eficiência baseia-se na radiação solar estimada para cada par de ângulos (azimute de 0° a 360° e elevação de 0° a 90°) em diversas capitais brasileiras. 
-O aplicativo obtém a localização do aparelho e identifica o ponto de referência cadastrado mais próximo. A partir daí, faz a correspondência em tempo real dos ângulos do celular com a tabela de irradiância ótima local, guiando o instalador para o ângulo de máxima captura solar.
-
----
-
-## 👥 Créditos e Realização
-
-Este aplicativo foi desenvolvido em parceria acadêmica com o **GriluEE** (Grupo de Pesquisa em Iluminação e Eficiência Energética) da **Universidade Federal de Sergipe (UFS)**.
-
-- **Desenvolvedor:** Mateus Lucena ([@themateus](https://github.com/themateus))
-- **Grupo de Pesquisa:** GriluEE - UFS
