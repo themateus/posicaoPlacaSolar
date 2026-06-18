@@ -148,6 +148,8 @@ function SplashScreen({ onDone }: { onDone: () => void }) {
   const fade1 = useRef(new Animated.Value(1)).current;
   const fade2 = useRef(new Animated.Value(0)).current;
   const fadeOut = useRef(new Animated.Value(1)).current;
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
 
   useEffect(() => {
     const t1 = setTimeout(() => {
@@ -170,14 +172,14 @@ function SplashScreen({ onDone }: { onDone: () => void }) {
         toValue: 0,
         duration: 500,
         useNativeDriver: true,
-      }).start(() => onDone());
+      }).start(() => onDoneRef.current());
     }, 4500);
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, []);
+  }, [fade1, fade2, fadeOut]);
 
   return (
     <Animated.View
@@ -255,7 +257,7 @@ const splash = StyleSheet.create({
 });
 
 // ─── Barra de progresso de eficiência ────────────────────────────────────────
-function ArcProgress({ pct, C: T }: { pct: number; C: Tema }) {
+function ArcProgress({ pct, C: T, onInfo }: { pct: number; C: Tema; onInfo?: () => void }) {
   const clamp = Math.min(100, Math.max(0, pct));
   const colors = getEfficiencyColors(clamp, T);
 
@@ -271,9 +273,35 @@ function ArcProgress({ pct, C: T }: { pct: number; C: Tema }) {
         ]}
       />
       <View style={arc.center}>
-        <Text style={[arc.label, { color: T.textSub }]}>
-          EFICIÊNCIA RELATIVA
-        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 2 }}>
+          <Text style={[arc.label, { color: T.textSub, marginBottom: 0 }]}>
+            EFICIÊNCIA RELATIVA
+          </Text>
+          {onInfo && (
+            <TouchableOpacity
+              onPress={onInfo}
+              style={{
+                marginLeft: 6,
+                width: 18,
+                height: 18,
+                borderRadius: 9,
+                backgroundColor: T.border,
+                alignItems: "center",
+                justifyContent: "center",
+                borderWidth: 0.5,
+                borderColor: T.isDark ? "#ffffff20" : "#00000010",
+              }}
+              activeOpacity={0.6}
+            >
+              <Image
+                source={require("../assets/images/question-svgrepo-com.svg")}
+                style={{ width: 10, height: 10 }}
+                contentFit="contain"
+                tintColor={T.textSub}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
         <Text style={[arc.value, { color: colors.base }]}>
           {clamp.toFixed(1)}%
         </Text>
@@ -311,11 +339,13 @@ function MetricCard({
   value,
   pct,
   C: T,
+  onInfo,
 }: {
   label: string;
   value: string;
   pct?: number;
   C: Tema;
+  onInfo?: () => void;
 }) {
   const isAccent = pct !== undefined;
   const colors = isAccent ? getEfficiencyColors(pct, T) : null;
@@ -328,7 +358,33 @@ function MetricCard({
         isAccent && { borderColor: colors!.mid, backgroundColor: colors!.dim },
       ]}
     >
-      <Text style={[mc.label, { color: T.textSub }]}>{label}</Text>
+      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}>
+        <Text style={[mc.label, { color: T.textSub, marginBottom: 0 }]}>{label}</Text>
+        {onInfo && (
+          <TouchableOpacity
+            onPress={onInfo}
+            style={{
+              marginLeft: 6,
+              width: 18,
+              height: 18,
+              borderRadius: 9,
+              backgroundColor: T.border,
+              alignItems: "center",
+              justifyContent: "center",
+              borderWidth: 0.5,
+              borderColor: T.isDark ? "#ffffff20" : "#00000010",
+            }}
+            activeOpacity={0.6}
+          >
+            <Image
+              source={require("../assets/images/question-svgrepo-com.svg")}
+              style={{ width: 10, height: 10 }}
+              contentFit="contain"
+              tintColor={T.textSub}
+            />
+          </TouchableOpacity>
+        )}
+      </View>
       <Text style={[mc.value, { color: isAccent ? colors!.base : T.text }]}>
         {value}
       </Text>
@@ -428,11 +484,6 @@ const hr = StyleSheet.create({
   pct: { flex: 0.9, fontSize: 14, fontWeight: "800", textAlign: "right" },
 });
 
-// ─── Ícone SVG de compartilhar (via texto Unicode) ────────────────────────────
-function ShareIcon({ color }: { color: string }) {
-  return <Text style={{ color, fontSize: 18, fontWeight: "700" }}>{"⬆"}</Text>;
-}
-
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const systemScheme = useColorScheme();
@@ -448,6 +499,10 @@ export default function App() {
   const [modalCidadeVisivel, setModalCidadeVisivel] = useState(false);
   const [carregandoLocalizacao, setCarregandoLocalizacao] = useState(true);
   const [splashVisivel, setSplashVisivel] = useState(true);
+
+  const [modalOnboardingVisivel, setModalOnboardingVisivel] = useState(false);
+  const [modalSobreVisivel, setModalSobreVisivel] = useState(false);
+  const [termoTooltip, setTermoTooltip] = useState<{ termo: string; explicacao: string } | null>(null);
 
   const [azimute, setAzimute] = useState(0);
   const [elevacao, setElevacao] = useState(0);
@@ -504,7 +559,7 @@ export default function App() {
         setCarregandoLocalizacao(false);
       }
     })();
-  }, []);
+  }, [cidadeInicial]);
 
   // Sensores
   useEffect(() => {
@@ -649,11 +704,13 @@ export default function App() {
           {/* ── Header ── */}
           <View style={s.header}>
             {/* Logo placeholder esquerda */}
-            <View
+            <TouchableOpacity
               style={[
                 s.logoSmall,
                 { backgroundColor: T.card, borderColor: T.border },
               ]}
+              onPress={() => setModalSobreVisivel(true)}
+              activeOpacity={0.7}
             >
               <Image
                 source={require("../assets/images/griloVetorizado.svg")}
@@ -663,7 +720,7 @@ export default function App() {
                   pctNum >= 70 ? T.green : pctNum >= 40 ? "#EAB308" : T.danger
                 }
               />
-            </View>
+            </TouchableOpacity>
 
             {/* Cidade */}
             <View style={s.headerCenter}>
@@ -676,19 +733,44 @@ export default function App() {
                   style={s.cityBtn}
                   activeOpacity={0.7}
                 >
-                  <Text
-                    style={[s.cityText, { color: T.text }]}
-                    numberOfLines={1}
-                  >
-                    📍 {cidadeExibida}
-                  </Text>
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <Image
+                      source={require("../assets/images/location-pin-alt-1-svgrepo-com.svg")}
+                      style={{ width: 16, height: 16, marginRight: 4 }}
+                      contentFit="contain"
+                      tintColor={T.text}
+                    />
+                    <Text
+                      style={[s.cityText, { color: T.text }]}
+                      numberOfLines={1}
+                    >
+                      {cidadeExibida}
+                    </Text>
+                  </View>
                   <Text style={[s.cityChevron, { color: T.amber }]}>›</Text>
                 </TouchableOpacity>
               )}
             </View>
 
-            {/* Botões direita: tema + exportar */}
+            {/* Botões direita: tema + exportar + onboarding */}
             <View style={s.headerActions}>
+              {/* Onboarding */}
+              <TouchableOpacity
+                style={[
+                  s.iconBtn,
+                  { backgroundColor: T.card, borderColor: T.border },
+                ]}
+                onPress={() => setModalOnboardingVisivel(true)}
+                activeOpacity={0.7}
+              >
+                <Image
+                  source={require("../assets/images/book-open-svgrepo-com.svg")}
+                  style={{ width: 18, height: 18 }}
+                  contentFit="contain"
+                  tintColor={T.text}
+                />
+              </TouchableOpacity>
+
               {/* Toggle tema */}
               <TouchableOpacity
                 style={[
@@ -737,7 +819,7 @@ export default function App() {
           </View>
 
           {/* ── Eficiência relativa ── */}
-          <ArcProgress pct={pctNum} C={T} />
+          <ArcProgress pct={pctNum} C={T} onInfo={() => setTermoTooltip({ termo: "Eficiência Relativa", explicacao: "Compara a radiação estimada na sua inclinação atual com a radiação máxima possível."})} />
 
           {/* ── Métricas ── */}
           <View style={s.metricRow}>
@@ -745,6 +827,7 @@ export default function App() {
               label="Previsto (lx)"
               value={medido > 0 ? Math.round(medido).toString() : "—"}
               C={T}
+              onInfo={() => setTermoTooltip({ termo: "Previsto (lx)", explicacao: "Nível de radiação solar estimada para a inclinação e direção atuais."})}
             />
             <View style={{ width: 10 }} />
             <MetricCard
@@ -752,6 +835,7 @@ export default function App() {
               value={melhorValor > 0 ? Math.round(melhorValor).toString() : "—"}
               pct={100}
               C={T}
+              onInfo={() => setTermoTooltip({ termo: "Máximo (lx)", explicacao: "Valor máximo ideal de radiação solar atingível na sua cidade."})}
             />
           </View>
           <View style={[s.metricRow, { marginTop: 10, marginBottom: 16 }]}>
@@ -759,12 +843,14 @@ export default function App() {
               label="Azimute"
               value={`${azimute.toFixed(1)}°`}
               C={T}
+              onInfo={() => setTermoTooltip({ termo: "Azimute", explicacao: "Ângulo da direção para onde a placa aponta, em relação ao Norte."})}
             />
             <View style={{ width: 10 }} />
             <MetricCard
               label="Elevação"
               value={`${elevacao.toFixed(1)}°`}
               C={T}
+              onInfo={() => setTermoTooltip({ termo: "Elevação", explicacao: "Ângulo de inclinação da placa em relação ao chão."})}
             />
           </View>
 
@@ -982,10 +1068,12 @@ export default function App() {
                       {
                         l: "AZIMUTE",
                         v: `${itemSelecionado.azimute.toFixed(1)}°`,
+                        onInfo: () => setTermoTooltip({ termo: "Azimute", explicacao: "Ângulo da direção para onde a placa aponta, em relação ao Norte."})
                       },
                       {
                         l: "ELEVAÇÃO",
                         v: `${itemSelecionado.elevacao.toFixed(1)}°`,
+                        onInfo: () => setTermoTooltip({ termo: "Elevação", explicacao: "Ângulo de inclinação da placa em relação ao chão."})
                       },
                       {
                         l: "PREVISTO (lx)",
@@ -993,6 +1081,7 @@ export default function App() {
                           itemSelecionado.medido > 0
                             ? Math.round(itemSelecionado.medido).toString()
                             : "—",
+                        onInfo: () => setTermoTooltip({ termo: "Previsto (lx)", explicacao: "Nível de radiação solar estimada para a inclinação e direção atuais."})
                       },
                       {
                         l: "MÁXIMO (lx)",
@@ -1000,13 +1089,15 @@ export default function App() {
                           melhorValor > 0
                             ? Math.round(melhorValor).toString()
                             : "—",
+                        onInfo: () => setTermoTooltip({ termo: "Máximo (lx)", explicacao: "Valor máximo ideal de radiação solar atingível na sua cidade."})
                       },
                       {
                         l: "EFICIÊNCIA RELATIVA",
                         v: itemSelecionado.percentual,
                         pct: parseFloat(itemSelecionado.percentual),
+                        onInfo: () => setTermoTooltip({ termo: "Eficiência Relativa", explicacao: "Compara a radiação estimada na sua inclinação atual com a radiação máxima possível."})
                       },
-                    ].map(({ l, v, pct }) => {
+                    ].map(({ l, v, pct, onInfo }) => {
                       const isAccent = pct !== undefined;
                       const colors = isAccent
                         ? getEfficiencyColors(pct, T)
@@ -1025,9 +1116,35 @@ export default function App() {
                             },
                           ]}
                         >
-                          <Text style={[d.cardLabel, { color: T.textSub }]}>
-                            {l}
-                          </Text>
+                          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}>
+                            <Text style={[d.cardLabel, { color: T.textSub, marginBottom: 0 }]}>
+                              {l}
+                            </Text>
+                            {onInfo && (
+                              <TouchableOpacity
+                                onPress={onInfo}
+                                style={{
+                                  marginLeft: 6,
+                                  width: 18,
+                                  height: 18,
+                                  borderRadius: 9,
+                                  backgroundColor: T.border,
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  borderWidth: 0.5,
+                                  borderColor: T.isDark ? "#ffffff20" : "#00000010",
+                                }}
+                                activeOpacity={0.6}
+                              >
+                                <Image
+                                  source={require("../assets/images/question-svgrepo-com.svg")}
+                                  style={{ width: 10, height: 10 }}
+                                  contentFit="contain"
+                                  tintColor={T.textSub}
+                                />
+                              </TouchableOpacity>
+                            )}
+                          </View>
                           <Text
                             style={[
                               d.cardValue,
@@ -1104,6 +1221,118 @@ export default function App() {
             </View>
           </View>
         </Modal>
+
+        {/* ── Modal Tooltip ── */}
+        <Modal
+          visible={!!termoTooltip}
+          animationType="fade"
+          transparent
+          onRequestClose={() => setTermoTooltip(null)}
+        >
+          <View style={m.overlayCentered}>
+            <View style={[m.sheet, { backgroundColor: T.surface, width: '80%', paddingBottom: 24 }]}>
+              <Text style={[m.title, { color: T.text, marginBottom: 8 }]}>
+                {termoTooltip?.termo}
+              </Text>
+              <Text style={{ color: T.textSub, fontSize: 15, lineHeight: 22, marginBottom: 20 }}>
+                {termoTooltip?.explicacao}
+              </Text>
+              <TouchableOpacity
+                style={[
+                  m.closeBtn,
+                  { backgroundColor: T.amber, borderColor: T.amber, marginTop: 0 },
+                ]}
+                onPress={() => setTermoTooltip(null)}
+                activeOpacity={0.8}
+              >
+                <Text style={[m.closeBtnText, { color: T.isDark ? "#080C18" : "#FFFFFF" }]}>
+                  Entendi
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        {/* ── Modal Sobre ── */}
+        <Modal
+          visible={modalSobreVisivel}
+          animationType="slide"
+          transparent
+          onRequestClose={() => setModalSobreVisivel(false)}
+        >
+          <View style={m.overlay}>
+            <View style={[m.sheet, { backgroundColor: T.surface, maxHeight: '90%' }]}>
+              <View style={[m.handle, { backgroundColor: T.border }]} />
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <Image
+                  source={require("../assets/images/logoGRILUU.png")}
+                  style={{ width: '100%', height: 120, marginBottom: 20 }}
+                  contentFit="contain"
+                />
+                <Text style={[m.title, { color: T.text, textAlign: 'center' }]}>Sobre o Projeto</Text>
+                <Text style={{ color: T.textSub, fontSize: 15, lineHeight: 22, marginBottom: 20, textAlign: 'center' }}>
+                  Este aplicativo faz parte do projeto TPanel, desenvolvido pelo grupo GriluEE (Grupo de pesquisa em iluminação e eficiência energética). O objetivo é facilitar o posicionamento de painéis solares para máxima eficiência na captação de energia solar.
+                </Text>
+
+                <TouchableOpacity
+                  style={[s.btnPrimary, { backgroundColor: T.card, borderColor: T.border, borderWidth: 1, marginBottom: 16 }]}
+                  onPress={() => {
+                    setModalSobreVisivel(false);
+                    setTimeout(() => setModalOnboardingVisivel(true), 300);
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[s.btnPrimaryText, { color: T.text }]}>Ver Tutorial</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[m.closeBtn, { backgroundColor: T.card, borderColor: T.border, marginTop: 0 }]}
+                  onPress={() => setModalSobreVisivel(false)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[m.closeBtnText, { color: T.textSub }]}>Fechar</Text>
+                </TouchableOpacity>
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+
+        {/* ── Modal Onboarding ── */}
+        <Modal
+          visible={modalOnboardingVisivel}
+          animationType="slide"
+          transparent
+          onRequestClose={() => setModalOnboardingVisivel(false)}
+        >
+          <View style={m.overlay}>
+            <View style={[m.sheet, { backgroundColor: T.surface, maxHeight: '90%' }]}>
+              <View style={[m.handle, { backgroundColor: T.border }]} />
+              <Text style={[m.title, { color: T.text }]}>Como utilizar a aplicação</Text>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <Text style={{ color: T.textSub, fontSize: 15, lineHeight: 22, marginBottom: 16 }}>
+                  <Text style={{ fontWeight: 'bold', color: T.text }}>1. Selecione o Local:</Text> O aplicativo tenta detectar sua localização automaticamente. Se não conseguir, toque em &quot;LOCAL&quot; e escolha sua cidade na lista para obter os dados de radiação solar corretos.
+                </Text>
+                <Text style={{ color: T.textSub, fontSize: 15, lineHeight: 22, marginBottom: 16 }}>
+                  <Text style={{ fontWeight: 'bold', color: T.text }}>2. Aponte o dispositivo:</Text> Posicione o celular sobre o painel solar ou no local onde deseja instalá-lo. O aplicativo medirá o <Text style={{ fontWeight: 'bold', color: T.text }}>Azimute</Text> (direção) e a <Text style={{ fontWeight: 'bold', color: T.text }}>Elevação</Text> (inclinação) em tempo real.
+                </Text>
+                <Text style={{ color: T.textSub, fontSize: 15, lineHeight: 22, marginBottom: 16 }}>
+                  <Text style={{ fontWeight: 'bold', color: T.text }}>3. Verifique a Eficiência:</Text> A barra de &quot;Eficiência Relativa&quot; indica o quão boa é a posição atual comparada à posição ideal para a sua cidade. Tente ajustar o celular até obter a maior porcentagem possível (cor verde).
+                </Text>
+                <Text style={{ color: T.textSub, fontSize: 15, lineHeight: 22, marginBottom: 16 }}>
+                  <Text style={{ fontWeight: 'bold', color: T.text }}>4. Salve e Exporte:</Text> Toque no botão &quot;SALVAR +&quot; para registrar as medições. Você pode salvar várias posições para comparar. Depois, use o botão de exportar (no canto superior direito) para compartilhar ou salvar os dados em formato CSV.
+                </Text>
+                <TouchableOpacity
+                  style={[m.closeBtn, { backgroundColor: T.amber, borderColor: T.amber }]}
+                  onPress={() => setModalOnboardingVisivel(false)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[m.closeBtnText, { color: T.isDark ? "#080C18" : "#FFFFFF" }]}>Começar</Text>
+                </TouchableOpacity>
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -1193,6 +1422,12 @@ const m = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.65)",
     justifyContent: "flex-end",
+  },
+  overlayCentered: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.65)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   sheet: {
     borderTopLeftRadius: 24,
