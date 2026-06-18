@@ -192,7 +192,7 @@ function SplashScreen({ onDone }: { onDone: () => void }) {
         style={[splash.content, { position: "absolute", opacity: fade1 }]}
       >
         <Image
-          source={require("../assets/images/TPanel.png")}
+          source={require("../assets/images/tpanel_logo.png")}
           style={{ width: 240, height: 240 }}
           contentFit="contain"
         />
@@ -202,12 +202,12 @@ function SplashScreen({ onDone }: { onDone: () => void }) {
         style={[splash.content, { position: "absolute", opacity: fade2 }]}
       >
         <Image
-          source={require("../assets/images/ufs_horizontal_positiva.png")}
+          source={require("../assets/images/logo_ufs.png")}
           style={{ width: 280, height: 100, marginBottom: 50 }}
           contentFit="contain"
         />
         <Image
-          source={require("../assets/images/logoGRILUU.png")}
+          source={require("../assets/images/logo_griluee.png")}
           style={{ width: 280, height: 280 }}
           contentFit="contain"
         />
@@ -294,7 +294,7 @@ function ArcProgress({ pct, C: T, onInfo }: { pct: number; C: Tema; onInfo?: () 
               activeOpacity={0.6}
             >
               <Image
-                source={require("../assets/images/question-svgrepo-com.svg")}
+                source={require("../assets/images/icon_question.svg")}
                 style={{ width: 10, height: 10 }}
                 contentFit="contain"
                 tintColor={T.textSub}
@@ -377,7 +377,7 @@ function MetricCard({
             activeOpacity={0.6}
           >
             <Image
-              source={require("../assets/images/question-svgrepo-com.svg")}
+              source={require("../assets/images/icon_question.svg")}
               style={{ width: 10, height: 10 }}
               contentFit="contain"
               tintColor={T.textSub}
@@ -713,7 +713,7 @@ export default function App() {
               activeOpacity={0.7}
             >
               <Image
-                source={require("../assets/images/griloVetorizado.svg")}
+                source={require("../assets/images/logo_grilu_vector.svg")}
                 style={{ width: 24, height: 24 }}
                 contentFit="contain"
                 tintColor={
@@ -735,7 +735,7 @@ export default function App() {
                 >
                   <View style={{ flexDirection: "row", alignItems: "center" }}>
                     <Image
-                      source={require("../assets/images/location-pin-alt-1-svgrepo-com.svg")}
+                      source={require("../assets/images/icon_location.svg")}
                       style={{ width: 16, height: 16, marginRight: 4 }}
                       contentFit="contain"
                       tintColor={T.text}
@@ -764,7 +764,7 @@ export default function App() {
                 activeOpacity={0.7}
               >
                 <Image
-                  source={require("../assets/images/book-open-svgrepo-com.svg")}
+                  source={require("../assets/images/icon_book.svg")}
                   style={{ width: 18, height: 18 }}
                   contentFit="contain"
                   tintColor={T.text}
@@ -784,14 +784,14 @@ export default function App() {
               >
                 {tema === "dark" ? (
                   <Image
-                    source={require("../assets/images/sun-svgrepo-com.svg")}
+                    source={require("../assets/images/icon_sun.svg")}
                     style={{ width: 20, height: 20 }}
                     contentFit="contain"
                     tintColor={T.text}
                   />
                 ) : (
                   <Image
-                    source={require("../assets/images/moon-svgrepo-com.svg")}
+                    source={require("../assets/images/icon_moon.svg")}
                     style={{ width: 20, height: 20 }}
                     contentFit="contain"
                     tintColor={T.text}
@@ -809,7 +809,7 @@ export default function App() {
                 activeOpacity={0.7}
               >
                 <Image
-                  source={require("../assets/images/arrow-up-right-from-square-svgrepo-com.svg")}
+                  source={require("../assets/images/icon_export.svg")}
                   style={{ width: 18, height: 18 }}
                   contentFit="contain"
                   tintColor={T.amber}
@@ -1137,7 +1137,7 @@ export default function App() {
                                 activeOpacity={0.6}
                               >
                                 <Image
-                                  source={require("../assets/images/question-svgrepo-com.svg")}
+                                  source={require("../assets/images/icon_question.svg")}
                                   style={{ width: 10, height: 10 }}
                                   contentFit="contain"
                                   tintColor={T.textSub}
@@ -1186,7 +1186,7 @@ export default function App() {
                       activeOpacity={0.7}
                     >
                       <Image
-                        source={require("../assets/images/trash-xmark-alt-svgrepo-com.svg")}
+                        source={require("../assets/images/icon_trash.svg")}
                         style={{ width: 22, height: 22 }}
                         contentFit="contain"
                         tintColor="#EF4444"
@@ -1265,7 +1265,7 @@ export default function App() {
               <View style={[m.handle, { backgroundColor: T.border }]} />
               <ScrollView showsVerticalScrollIndicator={false}>
                 <Image
-                  source={require("../assets/images/logoGRILUU.png")}
+                  source={require("../assets/images/logo_griluee.png")}
                   style={{ width: '100%', height: 120, marginBottom: 20 }}
                   contentFit="contain"
                 />
