@@ -1,4 +1,4 @@
-# TPanel ☀️📱
+# TPanel
 
 O **TPanel** é um aplicativo mobile desenvolvido para auxiliar na instalação e no posicionamento ideal de painéis solares. Através de sensores integrados ao dispositivo móvel (como acelerômetro e magnetômetro) e dados de radiação solar regionalizados, o aplicativo calcula a eficiência de captação em tempo real de acordo com a inclinação (elevação) e a orientação (azimute).
 
