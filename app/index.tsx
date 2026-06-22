@@ -299,7 +299,7 @@ function ArcProgress({ pct, C: T, onInfo }: { pct: number; C: Tema; onInfo?: () 
               activeOpacity={0.6}
             >
               <Image
-                source={require("../assets/images/question-svgrepo-com.svg")}
+                source={require("../assets/images/icon_question.svg")}
                 style={{ width: 10, height: 10 }}
                 contentFit="contain"
                 tintColor={T.textSub}
@@ -382,7 +382,7 @@ function MetricCard({
             activeOpacity={0.6}
           >
             <Image
-              source={require("../assets/images/question-svgrepo-com.svg")}
+              source={require("../assets/images/icon_question.svg")}
               style={{ width: 10, height: 10 }}
               contentFit="contain"
               tintColor={T.textSub}
@@ -718,7 +718,7 @@ export default function App() {
               activeOpacity={0.7}
             >
               <Image
-                source={require("../assets/images/griloVetorizado.svg")}
+                source={require("../assets/images/icon_grilu.svg")}
                 style={{ width: 24, height: 24 }}
                 contentFit="contain"
                 tintColor={
@@ -740,7 +740,7 @@ export default function App() {
                 >
                   <View style={{ flexDirection: "row", alignItems: "center" }}>
                     <Image
-                      source={require("../assets/images/location-pin-alt-1-svgrepo-com.svg")}
+                      source={require("../assets/images/icon_location.svg")}
                       style={{ width: 16, height: 16, marginRight: 4 }}
                       contentFit="contain"
                       tintColor={T.text}
@@ -769,7 +769,7 @@ export default function App() {
                 activeOpacity={0.7}
               >
                 <Image
-                  source={require("../assets/images/book-open-svgrepo-com.svg")}
+                  source={require("../assets/images/icon_book.svg")}
                   style={{ width: 18, height: 18 }}
                   contentFit="contain"
                   tintColor={T.text}
@@ -789,14 +789,14 @@ export default function App() {
               >
                 {tema === "dark" ? (
                   <Image
-                    source={require("../assets/images/sun-svgrepo-com.svg")}
+                    source={require("../assets/images/icon_sun.svg")}
                     style={{ width: 20, height: 20 }}
                     contentFit="contain"
                     tintColor={T.text}
                   />
                 ) : (
                   <Image
-                    source={require("../assets/images/moon-svgrepo-com.svg")}
+                    source={require("../assets/images/icon_moon.svg")}
                     style={{ width: 20, height: 20 }}
                     contentFit="contain"
                     tintColor={T.text}
@@ -814,7 +814,7 @@ export default function App() {
                 activeOpacity={0.7}
               >
                 <Image
-                  source={require("../assets/images/arrow-up-right-from-square-svgrepo-com.svg")}
+                  source={require("../assets/images/icon_export.svg")}
                   style={{ width: 18, height: 18 }}
                   contentFit="contain"
                   tintColor={T.amber}
@@ -896,11 +896,11 @@ export default function App() {
           <ScrollView style={s.list} showsVerticalScrollIndicator={false}>
             {historico.length === 0 ? (
               <View style={s.empty}>
-                <Text style={[s.emptyIcon, { color: T.grey2 }]}>◎</Text>
+                <Text style={[s.emptyIcon, { color: T.textSub }]}>◎</Text>
                 <Text style={[s.emptyText, { color: T.textSub }]}>
                   Nenhuma medição salva
                 </Text>
-                <Text style={[s.emptyHint, { color: T.grey2 }]}>
+                <Text style={[s.emptyHint, { color: T.textSub }]}>
                   Coloque o dispositivo sobre a superfície e toque em SALVAR
                 </Text>
               </View>
@@ -1142,7 +1142,7 @@ export default function App() {
                                 activeOpacity={0.6}
                               >
                                 <Image
-                                  source={require("../assets/images/question-svgrepo-com.svg")}
+                                  source={require("../assets/images/icon_question.svg")}
                                   style={{ width: 10, height: 10 }}
                                   contentFit="contain"
                                   tintColor={T.textSub}
@@ -1191,7 +1191,7 @@ export default function App() {
                       activeOpacity={0.7}
                     >
                       <Image
-                        source={require("../assets/images/trash-xmark-alt-svgrepo-com.svg")}
+                        source={require("../assets/images/icon_trash.svg")}
                         style={{ width: 22, height: 22 }}
                         contentFit="contain"
                         tintColor="#EF4444"
@@ -1402,7 +1402,7 @@ const s = StyleSheet.create({
   empty: { alignItems: "center", paddingTop: 36, paddingBottom: 20 },
   emptyIcon: { fontSize: 40, marginBottom: 12 },
   emptyText: { fontSize: 15, fontWeight: "600", marginBottom: 4 },
-  emptyHint: { fontSize: 13 },
+  emptyHint: { fontSize: 13, textAlign: "center", paddingHorizontal: 20 },
   actionBar: { flexDirection: "row", paddingVertical: 12, paddingBottom: 8 },
   btnSecondary: {
     borderWidth: 1.5,
