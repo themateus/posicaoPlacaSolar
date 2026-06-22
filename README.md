@@ -6,7 +6,7 @@ Este projeto foi desenvolvido em colaboração com o **GriluEE** (Grupo de Pesqu
 
 ---
 
-## 🚀 Funcionalidades Principais
+## Funcionalidades Principais
 
 - **Detecção de Sensores em Tempo Real**: Mede o **Azimute** (ângulo horizontal/direção geográfica) e a **Elevação** (ângulo vertical/inclinação do painel) em tempo real usando o magnetômetro e acelerômetro do aparelho.
 - **Cálculo de Eficiência Relativa**: Compara as leituras dos sensores em tempo real com a base de dados de irradiância solar da cidade selecionada, fornecendo a porcentagem de eficiência e um feedback visual por cores (Verde: eficiência ideal $\ge 70\%$, Amarelo: regular $\ge 40\%$, Vermelho: baixa eficiência $< 40\%$).
@@ -18,7 +18,7 @@ Este projeto foi desenvolvido em colaboração com o **GriluEE** (Grupo de Pesqu
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 O projeto foi construído utilizando o ecossistema moderno do **React Native** e **Expo**:
 
@@ -31,7 +31,7 @@ O projeto foi construído utilizando o ecossistema moderno do **React Native** e
 
 ---
 
-## 📦 Estrutura do Projeto
+## Estrutura do Projeto
 
 O código principal está organizado da seguinte forma:
 
@@ -49,7 +49,7 @@ O código principal está organizado da seguinte forma:
 
 ---
 
-## 💻 Como Executar o Projeto Localmente
+## Como Executar o Projeto Localmente
 
 ### Pré-requisitos
 1. **Node.js** (versão 18 ou superior recomendada)
@@ -81,7 +81,7 @@ O código principal está organizado da seguinte forma:
      ```bash
      npm run tunnel
      ```
-### 📱 Como Gerar o APK Instalável (Android)
+### Como Gerar o APK Instalável (Android)
 
 O projeto está configurado para gerar APKs diretamente na nuvem através do **Expo Application Services (EAS)**, garantindo a compatibilidade e o empacotamento correto de todos os vetores e assets nativos.
 
@@ -106,6 +106,3 @@ O aplicativo obtém a localização do aparelho e identifica o ponto de referên
 ## 👥 Créditos e Realização
 
 Este aplicativo foi desenvolvido em parceria acadêmica com o **GriluEE** (Grupo de Pesquisa em Iluminação e Eficiência Energética) da **Universidade Federal de Sergipe (UFS)**.
-
-- **Desenvolvedor:** Mateus Lucena ([@themateus](https://github.com/themateus))
-- **Grupo de Pesquisa:** GriluEE - UFS
