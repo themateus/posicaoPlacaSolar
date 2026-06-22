@@ -69,15 +69,43 @@ O código principal está organizado da seguinte forma:
    npm install
    ```
 
-3. Inicie o servidor de desenvolvimento do Expo:
+3. Inicie o servidor de desenvolvimento do Expo (com limpeza de cache recomendada para garantir a renderização correta de novos ícones SVG/PNG):
    ```bash
-   npx expo start
+   npx expo start -c
    ```
 
-4. **Rodando no Celular**:
+4. **Rodando no Celular (Expo Go)**:
    - Abra o aplicativo **Expo Go** no celular.
    - Escaneie o QR Code gerado no terminal.
    - Se o seu computador e o celular estiverem em redes diferentes, utilize o script de túnel incluído para conexão remota estável:
      ```bash
      npm run tunnel
      ```
+### 📱 Como Gerar o APK Instalável (Android)
+
+O projeto está configurado para gerar APKs diretamente na nuvem através do **Expo Application Services (EAS)**, garantindo a compatibilidade e o empacotamento correto de todos os vetores e assets nativos.
+
+Para gerar o arquivo `.apk` final:
+
+1. Certifique-se de estar logado na sua conta Expo no terminal (`npx eas login`).
+2. Execute o comando de build apontando para o perfil de *preview* (já configurado no `eas.json`):
+   ```bash
+   npx eas-cli build --platform android --profile preview
+   ```
+3. Ao finalizar a compilação na nuvem, o terminal fornecerá um link direto para baixar o `.apk` pronto para instalar no seu aparelho.
+
+---
+
+## 📊 Base de Dados e Metodologia
+
+O cálculo de eficiência baseia-se na radiação solar estimada para cada par de ângulos (azimute de 0° a 360° e elevação de 0° a 90°) em diversas capitais brasileiras. 
+O aplicativo obtém a localização do aparelho e identifica o ponto de referência cadastrado mais próximo. A partir daí, faz a correspondência em tempo real dos ângulos do celular com a tabela de irradiância ótima local, guiando o instalador para o ângulo de máxima captura solar.
+
+---
+
+## 👥 Créditos e Realização
+
+Este aplicativo foi desenvolvido em parceria acadêmica com o **GriluEE** (Grupo de Pesquisa em Iluminação e Eficiência Energética) da **Universidade Federal de Sergipe (UFS)**.
+
+- **Desenvolvedor:** Mateus Lucena ([@themateus](https://github.com/themateus))
+- **Grupo de Pesquisa:** GriluEE - UFS
