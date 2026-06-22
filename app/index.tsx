@@ -128,6 +128,10 @@ function calcularDistancia(
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+function formatarMilhar(val: number): string {
+  return Math.round(val).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
 type ItemIrradiacao = { azimute: number; elevacao: number; valor: number };
 type DadosCidades = Record<string, ItemIrradiacao[]>;
 type HistoricoItem = {
@@ -819,23 +823,23 @@ export default function App() {
           </View>
 
           {/* ── Eficiência relativa ── */}
-          <ArcProgress pct={pctNum} C={T} onInfo={() => setTermoTooltip({ termo: "Eficiência Relativa", explicacao: "Compara a radiação estimada na sua inclinação atual com a radiação máxima possível."})} />
+          <ArcProgress pct={pctNum} C={T} onInfo={() => setTermoTooltip({ termo: "Eficiência Relativa", explicacao: "Relação entre a incidência luminosa na posição atual e a máxima para a localidade"})} />
 
           {/* ── Métricas ── */}
           <View style={s.metricRow}>
             <MetricCard
               label="Previsto (lx)"
-              value={medido > 0 ? Math.round(medido).toString() : "—"}
+              value={medido > 0 ? formatarMilhar(medido) : "—"}
               C={T}
-              onInfo={() => setTermoTooltip({ termo: "Previsto (lx)", explicacao: "Nível de radiação solar estimada para a inclinação e direção atuais."})}
+              onInfo={() => setTermoTooltip({ termo: "Previsto (lx)", explicacao: "Iluminância estimada para a superfície para a posição atual, calculada como média da iluminância incidente no plano inclinado, em lx."})}
             />
             <View style={{ width: 10 }} />
             <MetricCard
               label="Máximo (lx)"
-              value={melhorValor > 0 ? Math.round(melhorValor).toString() : "—"}
+              value={melhorValor > 0 ? formatarMilhar(melhorValor) : "—"}
               pct={100}
               C={T}
-              onInfo={() => setTermoTooltip({ termo: "Máximo (lx)", explicacao: "Valor máximo ideal de radiação solar atingível na sua cidade."})}
+              onInfo={() => setTermoTooltip({ termo: "Máximo (lx)", explicacao: "Iluminância média anual máxima para a cidade estudada, em lx."})}
             />
           </View>
           <View style={[s.metricRow, { marginTop: 10, marginBottom: 16 }]}>
@@ -843,14 +847,14 @@ export default function App() {
               label="Azimute"
               value={`${azimute.toFixed(1)}°`}
               C={T}
-              onInfo={() => setTermoTooltip({ termo: "Azimute", explicacao: "Ângulo da direção para onde a placa aponta, em relação ao Norte."})}
+              onInfo={() => setTermoTooltip({ termo: "Azimute", explicacao: "Ângulo horizontal do painel, medido a partir do norte, no sentido horário"})}
             />
             <View style={{ width: 10 }} />
             <MetricCard
               label="Elevação"
               value={`${elevacao.toFixed(1)}°`}
               C={T}
-              onInfo={() => setTermoTooltip({ termo: "Elevação", explicacao: "Ângulo de inclinação da placa em relação ao chão."})}
+              onInfo={() => setTermoTooltip({ termo: "Elevação", explicacao: "Ângulo vertical medido a partir do horizonte em direção ao céu."})}
             />
           </View>
 
@@ -896,7 +900,7 @@ export default function App() {
                   Nenhuma medição salva
                 </Text>
                 <Text style={[s.emptyHint, { color: T.grey2 }]}>
-                  Aponte o dispositivo e toque em SALVAR
+                  Coloque o dispositivo sobre a superfície e toque em SALVAR
                 </Text>
               </View>
             ) : (
@@ -1068,34 +1072,34 @@ export default function App() {
                       {
                         l: "AZIMUTE",
                         v: `${itemSelecionado.azimute.toFixed(1)}°`,
-                        onInfo: () => setTermoTooltip({ termo: "Azimute", explicacao: "Ângulo da direção para onde a placa aponta, em relação ao Norte."})
+                        onInfo: () => setTermoTooltip({ termo: "Azimute", explicacao: "Ângulo horizontal do painel, medido a partir do norte, no sentido horário"})
                       },
                       {
                         l: "ELEVAÇÃO",
                         v: `${itemSelecionado.elevacao.toFixed(1)}°`,
-                        onInfo: () => setTermoTooltip({ termo: "Elevação", explicacao: "Ângulo de inclinação da placa em relação ao chão."})
+                        onInfo: () => setTermoTooltip({ termo: "Elevação", explicacao: "Ângulo vertical medido a partir do horizonte em direção ao céu."})
                       },
                       {
                         l: "PREVISTO (lx)",
                         v:
                           itemSelecionado.medido > 0
-                            ? Math.round(itemSelecionado.medido).toString()
+                            ? formatarMilhar(itemSelecionado.medido)
                             : "—",
-                        onInfo: () => setTermoTooltip({ termo: "Previsto (lx)", explicacao: "Nível de radiação solar estimada para a inclinação e direção atuais."})
+                        onInfo: () => setTermoTooltip({ termo: "Previsto (lx)", explicacao: "Iluminância estimada para a superfície para a posição atual, calculada como média da iluminância incidente no plano inclinado, em lx."})
                       },
                       {
                         l: "MÁXIMO (lx)",
                         v:
                           melhorValor > 0
-                            ? Math.round(melhorValor).toString()
+                            ? formatarMilhar(melhorValor)
                             : "—",
-                        onInfo: () => setTermoTooltip({ termo: "Máximo (lx)", explicacao: "Valor máximo ideal de radiação solar atingível na sua cidade."})
+                        onInfo: () => setTermoTooltip({ termo: "Máximo (lx)", explicacao: "Iluminância média anual máxima para a cidade estudada, em lx."})
                       },
                       {
                         l: "EFICIÊNCIA RELATIVA",
                         v: itemSelecionado.percentual,
                         pct: parseFloat(itemSelecionado.percentual),
-                        onInfo: () => setTermoTooltip({ termo: "Eficiência Relativa", explicacao: "Compara a radiação estimada na sua inclinação atual com a radiação máxima possível."})
+                        onInfo: () => setTermoTooltip({ termo: "Eficiência Relativa", explicacao: "Relação entre a incidência luminosa na posição atual e a máxima para a localidade"})
                       },
                     ].map(({ l, v, pct, onInfo }) => {
                       const isAccent = pct !== undefined;
@@ -1271,7 +1275,7 @@ export default function App() {
                 />
                 <Text style={[m.title, { color: T.text, textAlign: 'center' }]}>Sobre o Projeto</Text>
                 <Text style={{ color: T.textSub, fontSize: 15, lineHeight: 22, marginBottom: 20, textAlign: 'center' }}>
-                  Este aplicativo faz parte do projeto TPanel, desenvolvido pelo grupo GriluEE (Grupo de pesquisa em iluminação e eficiência energética). O objetivo é facilitar o posicionamento de painéis solares para máxima eficiência na captação de energia solar.
+                  Esse aplicativo foi desenvolvido pela equipe do Grupo de Pesquisa em Iluminação e Eficiência Energética – GriluEE. Seu objetivo é facilitar a escolha do posicionamento de painéis solares, para geração de energia solar fotovoltaica.
                 </Text>
 
                 <TouchableOpacity
