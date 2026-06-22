@@ -298,7 +298,7 @@ function ArcProgress({ pct, C: T, onInfo }: { pct: number; C: Tema; onInfo?: () 
               activeOpacity={0.6}
             >
               <Image
-                source={require("../assets/images/icon_question.svg")}
+                source={require("../assets/images/icon_question.png")}
                 style={{ width: 10, height: 10 }}
                 contentFit="contain"
                 tintColor={T.textSub}
@@ -381,7 +381,7 @@ function MetricCard({
             activeOpacity={0.6}
           >
             <Image
-              source={require("../assets/images/icon_question.svg")}
+              source={require("../assets/images/icon_question.png")}
               style={{ width: 10, height: 10 }}
               contentFit="contain"
               tintColor={T.textSub}
@@ -717,7 +717,7 @@ export default function App() {
               activeOpacity={0.7}
             >
               <Image
-                source={require("../assets/images/logo_grilu_vector.svg")}
+                source={require("../assets/images/logo_grilu_vector.png")}
                 style={{ width: 24, height: 24 }}
                 contentFit="contain"
                 tintColor={
@@ -739,7 +739,7 @@ export default function App() {
                 >
                   <View style={{ flexDirection: "row", alignItems: "center" }}>
                     <Image
-                      source={require("../assets/images/icon_location.svg")}
+                      source={require("../assets/images/icon_location.png")}
                       style={{ width: 16, height: 16, marginRight: 4 }}
                       contentFit="contain"
                       tintColor={T.text}
@@ -768,7 +768,7 @@ export default function App() {
                 activeOpacity={0.7}
               >
                 <Image
-                  source={require("../assets/images/icon_book.svg")}
+                  source={require("../assets/images/icon_book.png")}
                   style={{ width: 18, height: 18 }}
                   contentFit="contain"
                   tintColor={T.text}
@@ -788,14 +788,14 @@ export default function App() {
               >
                 {tema === "dark" ? (
                   <Image
-                    source={require("../assets/images/icon_sun.svg")}
+                    source={require("../assets/images/icon_sun.png")}
                     style={{ width: 20, height: 20 }}
                     contentFit="contain"
                     tintColor={T.text}
                   />
                 ) : (
                   <Image
-                    source={require("../assets/images/icon_moon.svg")}
+                    source={require("../assets/images/icon_moon.png")}
                     style={{ width: 20, height: 20 }}
                     contentFit="contain"
                     tintColor={T.text}
@@ -813,7 +813,7 @@ export default function App() {
                 activeOpacity={0.7}
               >
                 <Image
-                  source={require("../assets/images/icon_export.svg")}
+                  source={require("../assets/images/icon_export.png")}
                   style={{ width: 18, height: 18 }}
                   contentFit="contain"
                   tintColor={T.amber}
@@ -1141,7 +1141,7 @@ export default function App() {
                                 activeOpacity={0.6}
                               >
                                 <Image
-                                  source={require("../assets/images/icon_question.svg")}
+                                  source={require("../assets/images/icon_question.png")}
                                   style={{ width: 10, height: 10 }}
                                   contentFit="contain"
                                   tintColor={T.textSub}
@@ -1190,7 +1190,7 @@ export default function App() {
                       activeOpacity={0.7}
                     >
                       <Image
-                        source={require("../assets/images/icon_trash.svg")}
+                        source={require("../assets/images/icon_trash.png")}
                         style={{ width: 22, height: 22 }}
                         contentFit="contain"
                         tintColor="#EF4444"
