@@ -4,6 +4,13 @@ O **TPanel** é um aplicativo mobile desenvolvido para auxiliar na instalação 
 
 Este projeto foi desenvolvido em colaboração com o **GriluEE** (Grupo de Pesquisa em Iluminação e Eficiência Energética) da **Universidade Federal de Sergipe (UFS)**.
 
+<p align=center>
+   <img width="21%" src="https://github.com/user-attachments/assets/c8a9769b-27b2-4dab-8e7a-7c913c6e6de6" />&nbsp;&nbsp;
+   <img width="21%" src="https://github.com/user-attachments/assets/009126de-3fce-4bdd-84c9-1080021442fb" />&nbsp;&nbsp;
+   <img width="21%" src="https://github.com/user-attachments/assets/2b000e7f-d5be-4c6b-8a7c-1cfba5aa98b5" />&nbsp;&nbsp;
+   <img width="21%" src="https://github.com/user-attachments/assets/bd4c14ca-7fc4-4df8-b351-8ec58f43597f" />
+</p>
+
 ---
 
 ## Funcionalidades Principais
@@ -96,13 +103,13 @@ Para gerar o arquivo `.apk` final:
 
 ---
 
-## 📊 Base de Dados e Metodologia
+## Base de Dados e Metodologia
 
 O cálculo de eficiência baseia-se na radiação solar estimada para cada par de ângulos (azimute de 0° a 360° e elevação de 0° a 90°) em diversas capitais brasileiras. 
 O aplicativo obtém a localização do aparelho e identifica o ponto de referência cadastrado mais próximo. A partir daí, faz a correspondência em tempo real dos ângulos do celular com a tabela de irradiância ótima local, guiando o instalador para o ângulo de máxima captura solar.
 
 ---
 
-## 👥 Créditos e Realização
+## Créditos e Realização
 
 Este aplicativo foi desenvolvido em parceria acadêmica com o **GriluEE** (Grupo de Pesquisa em Iluminação e Eficiência Energética) da **Universidade Federal de Sergipe (UFS)**.
