@@ -9,6 +9,7 @@ import {
   Alert,
   Animated,
   FlatList,
+  Image as RNImage,
   Modal,
   ScrollView,
   StatusBar,
@@ -195,25 +196,25 @@ function SplashScreen({ onDone }: { onDone: () => void }) {
       <Animated.View
         style={[splash.content, { position: "absolute", opacity: fade1 }]}
       >
-        <Image
+        <RNImage
           source={require("../assets/images/tpanel_logo.png")}
           style={{ width: 240, height: 240 }}
-          contentFit="contain"
+          resizeMode="contain"
         />
       </Animated.View>
 
       <Animated.View
         style={[splash.content, { position: "absolute", opacity: fade2 }]}
       >
-        <Image
+        <RNImage
           source={require("../assets/images/logo_ufs.png")}
           style={{ width: 280, height: 100, marginBottom: 50 }}
-          contentFit="contain"
+          resizeMode="contain"
         />
-        <Image
+        <RNImage
           source={require("../assets/images/logo_griluee.png")}
           style={{ width: 280, height: 280 }}
-          contentFit="contain"
+          resizeMode="contain"
         />
       </Animated.View>
     </Animated.View>
@@ -1268,10 +1269,10 @@ export default function App() {
             <View style={[m.sheet, { backgroundColor: T.surface, maxHeight: '90%' }]}>
               <View style={[m.handle, { backgroundColor: T.border }]} />
               <ScrollView showsVerticalScrollIndicator={false}>
-                <Image
+                <RNImage
                   source={require("../assets/images/logo_griluee.png")}
                   style={{ width: '100%', height: 120, marginBottom: 20 }}
-                  contentFit="contain"
+                  resizeMode="contain"
                 />
                 <Text style={[m.title, { color: T.text, textAlign: 'center' }]}>Sobre o Projeto</Text>
                 <Text style={{ color: T.textSub, fontSize: 15, lineHeight: 22, marginBottom: 20, textAlign: 'center' }}>
